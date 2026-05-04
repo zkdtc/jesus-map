@@ -1,0 +1,3711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>The Life of Jesus Christ — A 3D Map of the Holy Land</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" />
+<style>
+/* ============== GLOBAL ============== */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#0c0a08;color:#f3e9d2;font-family:'EB Garamond',serif}
+canvas{display:block}
+
+/* parchment / sandstone vignette overlay */
+#scene{position:fixed;inset:0}
+#vignette{
+  position:fixed;inset:0;pointer-events:none;z-index:5;
+  background:
+    radial-gradient(ellipse at center, transparent 55%, rgba(20,12,4,0.55) 100%),
+    radial-gradient(ellipse at 30% 20%, rgba(255,220,160,0.05), transparent 60%);
+  mix-blend-mode:multiply;
+}
+
+/* ============== ORNATE PARCHMENT FRAME ============== */
+#frame{
+  position:fixed;inset:8px;pointer-events:none;z-index:6;
+  border:1px solid rgba(180,140,70,0.40);
+  border-radius:3px;
+  box-shadow:
+    inset 0 0 0 4px rgba(40,28,12,0.0),
+    inset 0 0 0 5px rgba(180,140,70,0.20),
+    inset 0 0 80px rgba(20,12,4,0.6),
+    0 0 0 1px rgba(255,235,180,0.06);
+}
+#frame::before, #frame::after{
+  content:'';position:absolute;width:50px;height:50px;
+  background:
+    linear-gradient(135deg, rgba(220,180,100,0.35) 0%, transparent 60%) no-repeat,
+    radial-gradient(circle at 12% 12%, rgba(255,220,150,0.55) 0%, transparent 35%);
+}
+#frame::before{top:8px;left:8px}
+#frame::after{top:8px;right:8px;transform:scaleX(-1)}
+.frame-corner{
+  position:absolute;width:50px;height:50px;
+  background:
+    linear-gradient(135deg, rgba(220,180,100,0.35) 0%, transparent 60%) no-repeat,
+    radial-gradient(circle at 12% 12%, rgba(255,220,150,0.55) 0%, transparent 35%);
+}
+#frame .bl{bottom:8px;left:8px;transform:scaleY(-1)}
+#frame .br{bottom:8px;right:8px;transform:scale(-1,-1)}
+
+/* ============== COMPASS ROSE ============== */
+#compass{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  width:56px;height:56px;z-index:9;pointer-events:none;
+  opacity:0.85;
+}
+#compass svg{width:100%;height:100%;display:block}
+#compass .ring{
+  fill:rgba(28,18,8,0.55);
+  stroke:rgba(220,180,100,0.55);
+  stroke-width:0.5;
+}
+#compass .needle-n{fill:#c84838}
+#compass .needle-s{fill:#3a2810}
+#compass .label{
+  font-family:'Cinzel',serif;font-size:8px;font-weight:700;
+  fill:#d8b878;letter-spacing:.2em;
+  text-anchor:middle;dominant-baseline:middle;
+}
+
+/* ============== SCALE BAR ============== */
+#scalebar{
+  position:fixed;bottom:24px;right:24px;z-index:9;
+  font-family:'Cinzel',serif;font-size:10px;color:#d8b878;
+  letter-spacing:.16em;text-align:center;
+  background:rgba(28,18,8,0.55);padding:6px 10px;border-radius:3px;
+  border:1px solid rgba(180,140,70,0.35);backdrop-filter:blur(4px);
+}
+#scalebar .bar{
+  display:flex;height:6px;margin:4px 0 2px 0;
+  border:1px solid #d8b878;
+}
+#scalebar .seg{flex:1;border-right:1px solid #d8b878}
+#scalebar .seg:last-child{border-right:none}
+#scalebar .seg.dark{background:#d8b878}
+#scalebar .label{font-size:9px;letter-spacing:.10em}
+body.zh #scalebar{font-family:'Noto Serif SC',serif}
+
+/* ============== TIMELINE SCRUBBER ============== */
+#timeline{
+  position:fixed;left:50%;bottom:90px;transform:translateX(-50%);
+  width:min(80%, 900px);z-index:25;
+  font-family:'Cinzel',serif;color:#d8b878;letter-spacing:.10em;
+  background:rgba(28,18,8,0.65);
+  border:1px solid rgba(180,140,70,0.40);
+  border-radius:6px;padding:10px 16px 12px 16px;
+  backdrop-filter:blur(6px);
+  box-shadow:0 8px 28px rgba(0,0,0,0.5);
+  user-select:none;
+}
+#timeline .row{display:flex;align-items:center;gap:10px}
+#timeline .label-en{font-size:11px;letter-spacing:.16em;flex-shrink:0;width:80px}
+#timeline .year-display{
+  font-size:13px;color:#f0d088;font-weight:700;letter-spacing:.08em;
+  margin-left:auto;flex-shrink:0;
+}
+#timeline-track{
+  position:relative;flex:1;height:30px;cursor:pointer;
+  margin:6px 0 0 0;
+}
+#timeline-track .line{
+  position:absolute;left:0;right:0;top:14px;height:2px;
+  background:linear-gradient(90deg,
+    #5080d0 0%, #5080d0 70%,    /* OT - lapis */
+    #f0b850 70%, #f0b850 88%,   /* NT - gold */
+    #c84838 88%, #c84838 100%); /* Paul - crimson */
+  border-radius:1px;
+  box-shadow:0 0 6px rgba(0,0,0,0.5);
+}
+#timeline-track .tick{
+  position:absolute;top:10px;width:2px;height:10px;
+  background:rgba(216,184,120,0.55);
+  pointer-events:none;
+}
+#timeline-track .marker{
+  position:absolute;top:10px;width:8px;height:10px;
+  border-radius:50%;
+  pointer-events:none;
+  transition:opacity .3s ease, transform .3s ease;
+  box-shadow:0 0 6px rgba(255,200,100,0.7);
+  cursor:pointer;
+  pointer-events:auto;
+}
+#timeline-track .marker.nt  {background:#f0b850;top:6px;width:6px;height:18px;border-radius:2px}
+#timeline-track .marker.ot  {background:#5080d0}
+#timeline-track .marker.paul{background:#c84838}
+#timeline-track .marker:hover{transform:scale(1.6) translate(-25%, -12%);z-index:5}
+#timeline-track .scrubber{
+  position:absolute;top:0;width:14px;height:30px;
+  background:linear-gradient(180deg, rgba(255,235,180,0.95), rgba(180,140,70,0.95));
+  border-radius:3px;
+  box-shadow:0 0 10px rgba(255,200,100,0.9), 0 0 18px rgba(220,140,40,0.5);
+  transform:translateX(-50%);
+  cursor:grab;pointer-events:auto;
+  border:1px solid rgba(40,28,12,0.5);
+}
+#timeline-track .scrubber:active{cursor:grabbing}
+#timeline-eras{
+  display:flex;margin-top:6px;font-size:9px;letter-spacing:.10em;
+  color:#a89070;font-style:italic;
+}
+#timeline-eras .era{
+  text-align:center;padding:0 2px;
+  border-right:1px dotted rgba(180,140,70,0.25);overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;
+}
+#timeline-eras .era:last-child{border-right:none}
+#timeline button.tl-btn{
+  background:transparent;border:1px solid rgba(180,140,70,0.4);
+  color:#b89868;padding:2px 8px;border-radius:10px;cursor:pointer;
+  font-family:inherit;font-size:10px;letter-spacing:.10em;
+  transition:all .2s ease;
+}
+#timeline button.tl-btn:hover{background:rgba(240,200,120,0.12);color:#f0d088}
+#timeline button.tl-btn.playing{background:rgba(240,200,120,0.25);color:#fff5cc}
+body.zh #timeline{font-family:'Noto Serif SC',serif;letter-spacing:.04em}
+body.zh #timeline .label-en{width:auto}
+
+/* ============== TITLE ============== */
+#title{
+  position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:20;
+  text-align:center;pointer-events:none;
+  text-shadow:0 0 14px rgba(0,0,0,0.85), 0 0 24px rgba(255,200,120,0.18);
+}
+#title .en{
+  font-family:'Cinzel',serif;font-weight:700;font-size:24px;
+  letter-spacing:.32em;color:#f8e6b8;
+}
+#title .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:15px;color:#d8c098;margin-top:4px;letter-spacing:.05em;
+}
+
+/* ============== EVENT LABELS (in 3D scene, positioned by JS) ============== */
+.event-label{
+  position:fixed;left:0;top:0;z-index:10;
+  pointer-events:auto;cursor:pointer;
+  transform-origin:50% 100%;
+  transition:opacity .35s ease, filter .35s ease;
+  will-change:transform;user-select:none;
+}
+.event-label .pin{
+  width:10px;height:10px;border-radius:50%;
+  background:radial-gradient(circle, #fff5c8 0%, #f0b850 50%, #6a3a10 100%);
+  margin:0 auto 4px auto;
+  box-shadow:0 0 8px rgba(255,200,100,0.85), 0 0 16px rgba(255,160,60,0.4);
+}
+.event-label.ot .pin{
+  background:radial-gradient(circle, #e0eaff 0%, #5080d0 50%, #0c1a48 100%);
+  box-shadow:0 0 8px rgba(140,180,240,0.85), 0 0 16px rgba(80,120,220,0.4);
+}
+.event-label.ot .card{
+  background:linear-gradient(180deg, rgba(232,236,250,0.94), rgba(200,212,235,0.92));
+  border-color:rgba(60,80,140,0.55);
+  box-shadow:0 2px 10px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(220,230,250,0.4);
+}
+.event-label.ot .name{color:#10204a;text-shadow:0 0 4px rgba(220,230,250,0.7)}
+.event-label.ot .place{color:#3a4870}
+.event-label.paul .pin{
+  background:radial-gradient(circle, #ffe0d8 0%, #c84838 50%, #400408 100%);
+  box-shadow:0 0 8px rgba(220,110,90,0.85), 0 0 16px rgba(200,80,60,0.4);
+}
+.event-label.paul .card{
+  background:linear-gradient(180deg, rgba(250,232,224,0.94), rgba(232,200,188,0.92));
+  border-color:rgba(140,40,30,0.55);
+  box-shadow:0 2px 10px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(252,232,222,0.4);
+}
+.event-label.paul .name{color:#5a0808;text-shadow:0 0 4px rgba(252,228,218,0.7)}
+.event-label.paul .place{color:#80281a}
+/* Timeline filter dimming */
+.event-label[data-tl-dim="1"]{opacity:0.18 !important;filter:saturate(0.4)}
+
+/* Cluster bubbles (multi-event aggregations when zoomed out) */
+.cluster-bubble{
+  position:absolute;transform:translate(-50%, -50%);
+  min-width:30px;height:30px;padding:0 8px;
+  border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cinzel',serif;font-size:13px;font-weight:700;
+  color:#2a1810;cursor:pointer;
+  background:linear-gradient(180deg, #fff5c8 0%, #f0b850 60%, #b89060 100%);
+  border:1.5px solid rgba(60,30,8,0.7);
+  box-shadow:0 2px 10px rgba(0,0,0,0.55), 0 0 12px rgba(255,200,100,0.5);
+  letter-spacing:.04em;
+  user-select:none;
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+.cluster-bubble:hover{
+  transform:translate(-50%, -50%) scale(1.15);
+  box-shadow:0 2px 14px rgba(0,0,0,0.7), 0 0 18px rgba(255,200,100,0.85);
+  z-index:13;
+}
+.cluster-bubble.layer-ot{
+  background:linear-gradient(180deg, #d8e8ff 0%, #5080d0 60%, #102060 100%);
+  color:#fff;border-color:rgba(20,30,80,0.8);
+  box-shadow:0 2px 10px rgba(0,0,0,0.55), 0 0 12px rgba(120,170,240,0.6);
+}
+.cluster-bubble.layer-paul{
+  background:linear-gradient(180deg, #ffe0d8 0%, #c84838 60%, #500810 100%);
+  color:#fff;border-color:rgba(80,8,16,0.8);
+  box-shadow:0 2px 10px rgba(0,0,0,0.55), 0 0 12px rgba(220,110,90,0.6);
+}
+.event-label .card{
+  background:linear-gradient(180deg, rgba(248,234,200,0.94), rgba(228,206,160,0.92));
+  border:1px solid rgba(120,80,30,0.55);
+  border-radius:3px;
+  padding:5px 9px 6px 9px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(255,235,190,0.4);
+  text-align:center;
+  min-width:88px;
+  color:#2a1810;
+}
+.event-label .name{
+  font-family:'Cinzel',serif;font-weight:700;font-size:12px;
+  letter-spacing:.10em;color:#3a1f08;
+  text-shadow:0 0 4px rgba(255,240,200,0.7);
+}
+.event-label .place{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:10px;color:#6a4520;margin-top:1px;letter-spacing:.04em;
+}
+
+/* ============== DETAIL PANEL ============== */
+#panel{
+  position:fixed;right:24px;top:80px;width:340px;max-height:78vh;overflow:auto;
+  background:linear-gradient(180deg, rgba(36,24,12,0.92), rgba(24,16,8,0.92));
+  border:1px solid rgba(200,160,90,0.35);
+  border-radius:4px;padding:18px 20px 22px 20px;color:#f3e6c8;z-index:30;
+  box-shadow:0 8px 36px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(255,220,160,0.06);
+  backdrop-filter:blur(6px);
+  transition:opacity .4s ease, transform .4s ease;
+  opacity:0;transform:translateX(20px);pointer-events:none;
+}
+#panel.show{opacity:1;transform:translateX(0);pointer-events:auto}
+#panel h2{
+  font-family:'Cinzel',serif;font-size:18px;letter-spacing:.18em;
+  color:#f5d488;border-bottom:1px solid rgba(200,160,90,0.3);
+  padding-bottom:8px;margin-bottom:10px;
+}
+#panel .place{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  color:#d8b878;font-size:14px;margin-bottom:12px;
+}
+#panel .ref{
+  display:inline-block;font-family:'Cinzel',serif;font-size:10px;
+  letter-spacing:.12em;color:#b89868;
+  border:1px solid rgba(200,160,90,0.4);
+  padding:3px 8px;border-radius:2px;margin-bottom:14px;
+}
+#panel .desc{font-size:14.5px;line-height:1.65;color:#ece0c2}
+#panel .scripture{
+  margin-top:14px;padding:10px 12px;
+  border-left:2px solid rgba(220,180,100,0.6);
+  background:rgba(255,235,180,0.04);
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:14px;color:#e8d4a4;line-height:1.55;
+}
+#panel .close{
+  position:absolute;right:10px;top:10px;
+  width:24px;height:24px;border-radius:50%;
+  background:transparent;border:1px solid rgba(200,160,90,0.4);
+  color:#d8b878;cursor:pointer;font-family:'Cinzel',serif;
+  display:flex;align-items:center;justify-content:center;
+}
+#panel .close:hover{background:rgba(200,160,90,0.15)}
+
+/* Year + era badges in the detail panel */
+#p-year{margin:-6px 0 10px 0;display:flex;gap:6px;flex-wrap:wrap}
+#p-year .year-tag{
+  font-family:'Cinzel',serif;font-size:11px;font-weight:700;
+  letter-spacing:.14em;color:#1a0c00;
+  background:linear-gradient(180deg,#f0d088,#b89060);
+  padding:3px 9px;border-radius:2px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.4);
+}
+#p-year .era-tag{
+  font-family:'EB Garamond',serif;font-style:italic;font-size:12px;
+  color:#d8b878;border:1px solid rgba(200,160,90,0.5);
+  padding:2px 8px;border-radius:2px;letter-spacing:.05em;
+}
+body.zh #p-year .era-tag{font-family:'Noto Serif SC',serif;font-style:normal}
+
+/* Layer accent on panel border */
+#panel[data-layer="ot"]{border-color:rgba(140,180,240,0.55)}
+#panel[data-layer="ot"] h2{color:#a8c8f0}
+#panel[data-layer="paul"]{border-color:rgba(220,140,120,0.55)}
+#panel[data-layer="paul"] h2{color:#f0a8a0}
+
+/* Panel prev/next nav */
+#p-nav{
+  display:flex;justify-content:space-between;margin-top:14px;
+  border-top:1px solid rgba(200,160,90,0.25);padding-top:10px;
+}
+#p-nav button{
+  background:transparent;border:1px solid rgba(200,160,90,0.4);
+  color:#b89868;padding:5px 12px;border-radius:14px;cursor:pointer;
+  font-family:'Cinzel',serif;font-size:11px;letter-spacing:.10em;
+  transition:all .2s ease;
+}
+#p-nav button:hover{background:rgba(240,200,120,0.12);color:#f0d088}
+body.zh #p-nav button{font-family:'Noto Serif SC',serif}
+
+/* ============== MOBILE RESPONSIVE ============== */
+@media (max-width: 760px){
+  #panel{width: calc(100vw - 24px); right: 12px; max-height: 50vh}
+  #search-box{width: calc(100vw - 90px); left: 12px}
+  #lang-toggle{top: auto; right: 12px; bottom: auto; top: 12px}
+  #layer-toggle{top: 60px; right: 12px}
+  #title .en{font-size:16px}
+  #title .sub{font-size:12px}
+  #timeline{width: calc(100vw - 24px); bottom: 14px}
+  #compass{display: none}
+  #scalebar{font-size: 9px; padding: 4px 6px}
+  #legend{display: none}
+}
+
+/* ============== PRINT STYLESHEET ============== */
+@media print{
+  #lang-toggle, #layer-toggle, #search-box, #timeline, #panel,
+  #hint, #compass, #scalebar, #vignette, #frame, #loader,
+  .cluster-bubble, .event-label{display: none !important}
+  body{background: white; color:black}
+}
+
+/* ============== LEGEND / FOOTER ============== */
+#legend{
+  position:fixed;left:20px;bottom:18px;z-index:20;
+  font-family:'EB Garamond',serif;font-size:12px;
+  color:#c8b088;line-height:1.6;
+  background:rgba(24,16,8,0.55);
+  border:1px solid rgba(160,120,60,0.25);
+  border-radius:3px;padding:10px 14px;backdrop-filter:blur(4px);
+  max-width:260px;
+}
+#legend b{color:#f0d088;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.14em}
+#legend .row{display:flex;align-items:center;gap:8px;margin-top:4px}
+#legend .sw{width:14px;height:8px;border-radius:1px}
+
+#hint{
+  position:fixed;right:20px;bottom:18px;z-index:20;
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:12px;color:#a89070;
+  background:rgba(24,16,8,0.55);
+  padding:6px 10px;border-radius:2px;
+}
+
+/* loading screen */
+#loader{
+  position:fixed;inset:0;background:#0c0a08;z-index:100;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  transition:opacity .8s ease;
+}
+#loader .lt{
+  font-family:'Cinzel',serif;font-size:16px;letter-spacing:.3em;color:#d8b878;
+}
+#loader .ls{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;
+  color:#8a7050;margin-top:8px;
+}
+#loader.hide{opacity:0;pointer-events:none}
+
+/* ============== LANGUAGE TOGGLE ============== */
+#lang-toggle{
+  position:fixed;top:18px;right:24px;z-index:40;
+  display:flex;background:rgba(24,16,8,0.7);
+  border:1px solid rgba(200,160,90,0.45);
+  border-radius:20px;overflow:hidden;
+  font-family:'Cinzel',serif;font-size:11px;letter-spacing:.16em;
+  backdrop-filter:blur(6px);
+  box-shadow:0 4px 14px rgba(0,0,0,0.5);
+}
+#lang-toggle button{
+  background:transparent;border:0;color:#b89868;
+  padding:7px 14px;cursor:pointer;
+  transition:all .25s ease;font-family:inherit;font-size:inherit;
+  letter-spacing:inherit;
+}
+#lang-toggle button.active{
+  background:linear-gradient(180deg, rgba(240,200,120,0.85), rgba(180,140,70,0.85));
+  color:#2a1810;text-shadow:0 1px 0 rgba(255,235,180,0.5);
+}
+#lang-toggle button:not(.active):hover{color:#f0d088}
+
+/* ============== LAYER TOGGLE (NT / OT) ============== */
+#layer-toggle{
+  position:fixed;top:60px;right:24px;z-index:40;
+  display:flex;flex-direction:column;gap:6px;
+  font-family:'Cinzel',serif;font-size:11px;letter-spacing:.14em;
+}
+#layer-toggle button{
+  background:rgba(24,16,8,0.7);
+  border:1px solid rgba(200,160,90,0.45);
+  border-radius:18px;
+  color:#b89868;padding:6px 12px;cursor:pointer;
+  display:flex;align-items:center;gap:8px;
+  font-family:inherit;font-size:inherit;letter-spacing:inherit;
+  backdrop-filter:blur(6px);
+  transition:all .25s ease;
+  box-shadow:0 4px 14px rgba(0,0,0,0.5);
+}
+#layer-toggle .dot{
+  width:10px;height:10px;border-radius:50%;display:inline-block;
+}
+#layer-toggle .dot.nt{
+  background:radial-gradient(circle, #fff5c8 0%, #f0b850 60%, #6a3a10 100%);
+  box-shadow:0 0 6px rgba(255,200,100,0.8);
+}
+#layer-toggle .dot.ot{
+  background:radial-gradient(circle, #d8e8ff 0%, #5080d0 60%, #102060 100%);
+  box-shadow:0 0 6px rgba(120,170,240,0.8);
+}
+#layer-toggle .dot.paul{
+  background:radial-gradient(circle, #ffe0d8 0%, #c84838 60%, #500810 100%);
+  box-shadow:0 0 6px rgba(220,110,90,0.8);
+}
+#layer-toggle button:not(.active){opacity:0.55}
+#layer-toggle button.active{
+  color:#f0d088;border-color:rgba(240,200,120,0.7);
+  background:rgba(40,28,14,0.85);
+}
+#btn-ot.active{color:#a8c8f0;border-color:rgba(140,180,240,0.7)}
+#btn-paul.active{color:#f0a8a0;border-color:rgba(220,140,120,0.7)}
+body.zh #layer-toggle{font-family:'Noto Serif SC',serif;font-size:12px;letter-spacing:.04em}
+
+/* ============== SEARCH BOX ============== */
+#search-box{
+  position:fixed;left:24px;top:24px;z-index:40;width:260px;
+  font-family:'EB Garamond',serif;
+}
+#search-input{
+  width:100%;padding:8px 12px;
+  background:rgba(24,16,8,0.85);
+  border:1px solid rgba(200,160,90,0.45);
+  border-radius:18px;
+  color:#f0d088;font-family:inherit;font-size:14px;letter-spacing:.04em;
+  outline:none;transition:border-color .25s ease, box-shadow .25s ease;
+  backdrop-filter:blur(6px);
+  box-shadow:0 4px 14px rgba(0,0,0,0.5);
+}
+#search-input::placeholder{color:#8a7050;font-style:italic}
+#search-input:focus{
+  border-color:rgba(240,200,120,0.85);
+  box-shadow:0 4px 14px rgba(0,0,0,0.5), 0 0 0 2px rgba(240,200,120,0.15);
+}
+#search-results{
+  margin-top:6px;
+  background:rgba(24,16,8,0.92);
+  border:1px solid rgba(200,160,90,0.35);
+  border-radius:6px;
+  max-height:0;overflow:hidden;transition:max-height .3s ease;
+  box-shadow:0 8px 22px rgba(0,0,0,0.7);
+}
+#search-results.show{max-height:50vh;overflow-y:auto}
+#search-results .item{
+  padding:8px 14px;cursor:pointer;color:#e8d4a4;font-size:13px;
+  border-bottom:1px solid rgba(120,90,40,0.18);
+  display:flex;align-items:center;gap:8px;
+  transition:background .15s ease;
+}
+#search-results .item:hover{background:rgba(240,200,120,0.12);color:#fff5cc}
+#search-results .item:last-child{border-bottom:none}
+#search-results .item .layer-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;
+}
+#search-results .item .layer-dot.nt  {background:#f0b850;box-shadow:0 0 6px rgba(255,200,100,0.7)}
+#search-results .item .layer-dot.ot  {background:#5080d0;box-shadow:0 0 6px rgba(120,170,240,0.7)}
+#search-results .item .layer-dot.paul{background:#c84838;box-shadow:0 0 6px rgba(220,110,90,0.7)}
+#search-results .item .name{flex:1;font-weight:500}
+#search-results .item .place{font-style:italic;font-size:11px;color:#a89070}
+#search-results .empty{padding:10px 14px;color:#7a6040;font-style:italic;font-size:12px;text-align:center}
+body.zh #search-input{font-family:'Noto Serif SC',serif}
+body.zh #search-results .item .name{font-family:'Noto Serif SC',serif}
+body.zh #search-results .item .place{font-family:'Noto Serif SC',serif}
+
+/* ============== CITY / PLACE LABELS ============== */
+.city-label{
+  position:fixed;left:0;top:0;z-index:8;
+  pointer-events:none;
+  font-family:'Cinzel',serif;font-weight:500;
+  letter-spacing:.10em;color:#3a2410;
+  text-shadow:
+    0 0 3px rgba(255,245,210,0.9),
+    0 0 6px rgba(255,235,180,0.8),
+    0 1px 0 rgba(255,250,220,0.6);
+  white-space:nowrap;
+  transform-origin:50% 50%;
+  transition:opacity .35s ease;
+  user-select:none;
+}
+.city-label .dot{
+  display:inline-block;width:5px;height:5px;border-radius:50%;
+  background:#3a1f08;margin-right:5px;vertical-align:middle;
+  box-shadow:0 0 4px rgba(255,245,200,0.8);
+}
+.city-label.capital{
+  font-weight:700;font-size:13px;letter-spacing:.16em;color:#5a1a08;
+}
+.city-label.capital .dot{
+  width:8px;height:8px;background:#8a1010;
+  box-shadow:0 0 6px rgba(255,200,120,0.9), 0 0 10px rgba(220,80,40,0.5);
+}
+.city-label.city{font-size:11px}
+.city-label.mountain{
+  font-style:italic;font-size:11px;color:#3a2810;
+}
+.city-label.mountain .dot{background:transparent;
+  width:0;height:0;
+  border-left:4px solid transparent;border-right:4px solid transparent;
+  border-bottom:6px solid #4a3018;border-radius:0;
+  box-shadow:none;margin-right:4px;
+}
+body.zh .city-label{font-family:'Noto Serif SC',serif;letter-spacing:.04em}
+body.zh .city-label.capital{font-family:'Ma Shan Zheng',cursive;font-weight:400;font-size:16px;letter-spacing:.06em}
+body.zh .city-label.mountain{font-style:normal}
+
+/* ============== SEA LABELS (large, italic, water-blue) ============== */
+.sea-label{
+  position:fixed;left:0;top:0;z-index:7;
+  pointer-events:none;
+  font-family:'Cinzel',serif;font-style:italic;font-weight:500;
+  font-size:22px;letter-spacing:.42em;
+  color:#1a3858;
+  text-shadow:
+    0 0 8px rgba(220,235,255,0.95),
+    0 0 16px rgba(180,210,240,0.7),
+    0 1px 0 rgba(255,255,255,0.5);
+  white-space:nowrap;
+  transform-origin:50% 50%;
+  transition:opacity .35s ease;
+  user-select:none;
+  opacity:0.92;
+}
+body.zh .sea-label{
+  font-family:'Ma Shan Zheng',cursive;font-style:normal;
+  font-weight:400;font-size:26px;letter-spacing:.30em;
+  color:#1a3858;
+}
+
+/* ============== CHINESE MODE ============== */
+body.zh #title .en{font-family:'Ma Shan Zheng',cursive;font-weight:400;font-size:30px;letter-spacing:.18em;color:#f8e6b8}
+body.zh #title .sub{font-family:'ZCOOL XiaoWei',serif;font-style:normal;font-size:15px;letter-spacing:.20em}
+body.zh .event-label .name{font-family:'Noto Serif SC',serif;font-size:12px;letter-spacing:.05em}
+body.zh .event-label .place{font-family:'Noto Serif SC',serif;font-style:normal;font-size:10.5px;letter-spacing:.02em}
+body.zh #panel h2{font-family:'Ma Shan Zheng',cursive;font-weight:400;font-size:22px;letter-spacing:.10em}
+body.zh #panel .place{font-family:'Noto Serif SC',serif;font-style:normal;font-size:14px}
+body.zh #panel .ref{font-family:'Noto Serif SC',serif;font-size:10.5px;letter-spacing:.05em}
+body.zh #panel .desc{font-family:'Noto Serif SC',serif;font-size:14.5px;line-height:1.85}
+body.zh #panel .scripture{font-family:'ZCOOL XiaoWei',serif;font-style:normal;font-size:14.5px;line-height:1.75}
+body.zh #legend{font-family:'Noto Serif SC',serif}
+body.zh #legend b{font-family:'Ma Shan Zheng',cursive;font-weight:400;font-size:14px;letter-spacing:.10em}
+body.zh #hint{font-family:'Noto Serif SC',serif;font-style:normal}
+body.zh #loader .lt{font-family:'Ma Shan Zheng',cursive;font-weight:400;font-size:24px;letter-spacing:.18em}
+body.zh #loader .ls{font-family:'ZCOOL XiaoWei',serif;font-style:normal}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="lt" data-en="THE HOLY LAND" data-zh="圣 地">THE HOLY LAND</div>
+  <div class="ls" data-en="…preparing the parchment…" data-zh="…羊皮卷正在展开…">…preparing the parchment…</div>
+</div>
+
+<canvas id="scene"></canvas>
+<div id="vignette"></div>
+<div id="frame">
+  <div class="frame-corner bl"></div>
+  <div class="frame-corner br"></div>
+</div>
+
+<!-- Compass rose -->
+<div id="compass" title="North is up">
+  <svg viewBox="-50 -50 100 100">
+    <circle class="ring" cx="0" cy="0" r="44"/>
+    <circle class="ring" cx="0" cy="0" r="32" fill="none"/>
+    <!-- Cardinal tick marks -->
+    <line x1="0" y1="-44" x2="0" y2="-38" stroke="#d8b878" stroke-width="1.2"/>
+    <line x1="0" y1="44"  x2="0" y2="38"  stroke="#d8b878" stroke-width="1.2"/>
+    <line x1="-44" y1="0" x2="-38" y2="0" stroke="#d8b878" stroke-width="1.2"/>
+    <line x1="44"  y1="0" x2="38"  y2="0" stroke="#d8b878" stroke-width="1.2"/>
+    <!-- Needle: red north, dark south -->
+    <polygon class="needle-n" points="0,-30 -6,0 6,0"/>
+    <polygon class="needle-s" points="0,30 -5,0 5,0"/>
+    <!-- Direction labels -->
+    <text class="label" x="0"  y="-46">N</text>
+    <text class="label" x="0"  y="48">S</text>
+    <text class="label" x="-46" y="0">W</text>
+    <text class="label" x="46"  y="0">E</text>
+    <!-- Center dot -->
+    <circle cx="0" cy="0" r="2.5" fill="#d8b878"/>
+  </svg>
+</div>
+
+<!-- Scale bar -->
+<div id="scalebar">
+  <div data-en="SCALE" data-zh="比例尺">SCALE</div>
+  <div class="bar">
+    <div class="seg dark"></div><div class="seg"></div><div class="seg dark"></div><div class="seg"></div>
+  </div>
+  <div class="label">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;25&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;50&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;75&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;<span data-en="km" data-zh="公里">km</span></div>
+</div>
+
+<div id="lang-toggle">
+  <button id="btn-en" class="active" onclick="setLang('en')">EN</button>
+  <button id="btn-zh" onclick="setLang('zh')">中文</button>
+</div>
+
+<div id="layer-toggle">
+  <button id="btn-nt" class="active" onclick="toggleLayer('nt')">
+    <span class="dot nt"></span><span data-en="New Testament" data-zh="新约事件">New Testament</span>
+  </button>
+  <button id="btn-ot" onclick="toggleLayer('ot')">
+    <span class="dot ot"></span><span data-en="Old Testament" data-zh="旧约事件">Old Testament</span>
+  </button>
+  <button id="btn-paul" onclick="toggleLayer('paul')">
+    <span class="dot paul"></span><span data-en="Acts &amp; Paul" data-zh="使徒行传 · 保罗">Acts &amp; Paul</span>
+  </button>
+  <button id="btn-all" onclick="toggleAllLayers()" style="border-style:dashed">
+    <span data-en="All / None" data-zh="全部 / 全关">All / None</span>
+  </button>
+</div>
+
+<div id="search-box">
+  <input id="search-input" type="text" autocomplete="off"
+         data-placeholder-en="Search events or places…"
+         data-placeholder-zh="搜索事件或地名…"
+         placeholder="Search events or places…" />
+  <div id="search-results"></div>
+</div>
+
+<!-- Timeline scrubber -->
+<div id="timeline">
+  <div class="row">
+    <div class="label-en" data-en="TIMELINE" data-zh="时间轴">TIMELINE</div>
+    <button class="tl-btn" id="tl-play" onclick="toggleTimelinePlay()" data-en="▶ Play" data-zh="▶ 播放">▶ Play</button>
+    <button class="tl-btn" id="tl-reset" onclick="resetTimeline()" data-en="↺ All eras" data-zh="↺ 全部">↺ All eras</button>
+    <div class="year-display" id="tl-year">— all eras —</div>
+  </div>
+  <div id="timeline-track">
+    <div class="line"></div>
+    <!-- ticks, markers, scrubber injected by JS -->
+  </div>
+  <div id="timeline-eras"></div>
+</div>
+
+<div id="title">
+  <div class="en" data-en="THE LIFE OF JESUS CHRIST" data-zh="耶稣基督的一生">THE LIFE OF JESUS CHRIST</div>
+  <div class="sub" data-en="— A Three-Dimensional Map of the Holy Land —"
+                   data-zh="— 圣地三维地图 —">— A Three-Dimensional Map of the Holy Land —</div>
+</div>
+
+<div id="panel">
+  <button class="close" onclick="closePanel()">×</button>
+  <h2 id="p-title"></h2>
+  <div id="p-year"></div>
+  <div class="place" id="p-place"></div>
+  <div class="ref" id="p-ref"></div>
+  <div class="desc" id="p-desc"></div>
+  <div class="scripture" id="p-scrip"></div>
+  <div id="p-nav">
+    <button onclick="navPanel(-1)" data-en="◀ Prev" data-zh="◀ 上一个">◀ Prev</button>
+    <button onclick="navPanel(+1)" data-en="Next ▶" data-zh="下一个 ▶">Next ▶</button>
+  </div>
+</div>
+
+<div id="legend">
+  <b data-en="LEGEND" data-zh="图例">LEGEND</b>
+  <div class="row"><div class="sw" style="background:#3a6a98"></div>
+    <span data-en="Sea / Lake / Jordan" data-zh="海 · 湖 · 约旦河">Sea / Lake / Jordan</span></div>
+  <div class="row"><div class="sw" style="background:#7a8a4a"></div>
+    <span data-en="Galilee hills / Carmel" data-zh="加利利山 · 迦密山">Galilee hills / Carmel</span></div>
+  <div class="row"><div class="sw" style="background:#c8a868"></div>
+    <span data-en="Judean desert / Negev" data-zh="犹大旷野 · 内盖夫">Judean desert / Negev</span></div>
+  <div class="row"><div class="sw" style="background:#a89060"></div>
+    <span data-en="Judean & Samaria mountains" data-zh="犹大与撒玛利亚山地">Judean &amp; Samaria mountains</span></div>
+  <div class="row"><div class="sw" style="background:#d8c8a4"></div>
+    <span data-en="Coastal plain" data-zh="沿海平原">Coastal plain</span></div>
+  <div class="row" style="margin-top:6px;border-top:1px solid rgba(160,120,60,0.3);padding-top:6px">
+    <div class="sw" style="background:radial-gradient(circle,#fff5c8 10%,#f0b850 60%,#6a3a10);border-radius:50%;width:10px;height:10px"></div>
+    <span data-en="New Testament event" data-zh="新约事件">New Testament event</span></div>
+  <div class="row">
+    <div class="sw" style="background:radial-gradient(circle,#d8e8ff 10%,#5080d0 60%,#102060);border-radius:50%;width:10px;height:10px"></div>
+    <span data-en="Old Testament event" data-zh="旧约事件">Old Testament event</span></div>
+  <div class="row">
+    <div class="sw" style="background:radial-gradient(circle,#ffe0d8 10%,#c84838 60%,#400408);border-radius:50%;width:10px;height:10px"></div>
+    <span data-en="Acts &amp; Paul event" data-zh="使徒行传 · 保罗">Acts &amp; Paul event</span></div>
+</div>
+
+<div id="hint" data-en="drag to rotate · scroll to zoom · click a marker"
+                data-zh="拖动旋转 · 滚轮缩放 · 点击金柱">drag to rotate · scroll to zoom · click a marker</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+/* ===================== DATA ===================== */
+// Approximate (lng, lat) of significant New-Testament locations
+const EVENTS = [
+  { id:'annunciation', name:'The Annunciation', place:'Nazareth', coord:[35.30, 32.70],
+    ref:'Luke 1:26–38', order:1,
+    desc:'The angel Gabriel was sent from God to a virgin named Mary in Nazareth, announcing that she would conceive and bear the Son of the Most High.',
+    scripture:'"Behold, the maidservant of the Lord! Let it be to me according to your word." — Luke 1:38' },
+
+  { id:'nativity', name:'The Nativity', place:'Bethlehem', coord:[35.20, 31.70],
+    ref:'Luke 2:1–20', order:2,
+    desc:'Born in a manger in Bethlehem during the census of Caesar Augustus. Shepherds came in haste, having heard angels singing in the fields nearby.',
+    scripture:'"For unto you is born this day in the city of David a Saviour, which is Christ the Lord." — Luke 2:11' },
+
+  { id:'presentation', name:'Presentation in the Temple', place:'Jerusalem', coord:[35.235, 31.778],
+    ref:'Luke 2:22–38', order:3,
+    desc:'Forty days after His birth, Mary and Joseph brought the child Jesus to the Temple. Simeon took Him in his arms and blessed God, and the prophetess Anna gave thanks.',
+    scripture:'"Mine eyes have seen thy salvation." — Luke 2:30' },
+
+  { id:'flight', name:'Flight into Egypt', place:'Egypt (via the Sinai)', coord:[34.30, 30.90],
+    ref:'Matthew 2:13–15', order:4,
+    desc:'Warned in a dream of Herod\'s plot, Joseph took the child and His mother and fled by night into Egypt, fulfilling what was spoken by the prophet.',
+    scripture:'"Out of Egypt have I called my son." — Matthew 2:15' },
+
+  { id:'baptism', name:'The Baptism of Jesus', place:'Jordan River, near Bethany-beyond-Jordan', coord:[35.545, 31.837],
+    ref:'Matthew 3:13–17', order:5,
+    desc:'Jesus came from Galilee to John at the Jordan to be baptised. As He came up from the water, the heavens opened and the Spirit of God descended like a dove.',
+    scripture:'"This is my beloved Son, in whom I am well pleased." — Matthew 3:17' },
+
+  { id:'temptation', name:'The Temptation', place:'Judean Wilderness', coord:[35.45, 31.85],
+    ref:'Matthew 4:1–11', order:6,
+    desc:'Led by the Spirit into the wilderness, Jesus fasted forty days and forty nights, and was tempted by the devil. Tradition places this on the Mount of Temptation above Jericho.',
+    scripture:'"Man shall not live by bread alone, but by every word that proceedeth out of the mouth of God." — Matthew 4:4' },
+
+  { id:'cana', name:'Wedding at Cana — First Miracle', place:'Cana of Galilee', coord:[35.339, 32.748],
+    ref:'John 2:1–11', order:7,
+    desc:'At a wedding feast Jesus turned water into wine — the first of His signs — and so manifested His glory; and His disciples believed in Him.',
+    scripture:'"Thou hast kept the good wine until now." — John 2:10' },
+
+  { id:'capernaum', name:'Ministry in Capernaum', place:'Capernaum, Sea of Galilee', coord:[35.575, 32.881],
+    ref:'Matthew 4:13; Mark 1–2', order:8,
+    desc:'Leaving Nazareth, Jesus came and dwelt in Capernaum upon the sea coast. Here He called fishermen to be His disciples, healed Peter\'s mother-in-law, and taught in the synagogue.',
+    scripture:'"Follow me, and I will make you fishers of men." — Matthew 4:19' },
+
+  { id:'sermon', name:'Sermon on the Mount', place:'Mount of Beatitudes, Galilee', coord:[35.553, 32.881],
+    ref:'Matthew 5–7', order:9,
+    desc:'Seeing the multitudes, He went up into a mountain, sat down, and taught them: blessed are the poor in spirit, the meek, the merciful, the pure in heart, the peacemakers.',
+    scripture:'"Ye are the light of the world. A city that is set on an hill cannot be hid." — Matthew 5:14' },
+
+  { id:'storm', name:'Calming the Storm', place:'Sea of Galilee', coord:[35.59, 32.83],
+    ref:'Mark 4:35–41', order:10,
+    desc:'A great storm of wind arose; the waves beat into the boat. Jesus rebuked the wind, and said unto the sea, Peace, be still. And there was a great calm.',
+    scripture:'"What manner of man is this, that even the wind and the sea obey him?" — Mark 4:41' },
+
+  { id:'feeding', name:'Feeding of the 5000', place:'Tabgha / Bethsaida', coord:[35.547, 32.872],
+    ref:'John 6:1–14', order:11,
+    desc:'With five barley loaves and two small fishes, Jesus fed five thousand men, besides women and children — and twelve baskets of fragments remained.',
+    scripture:'"I am the bread of life: he that cometh to me shall never hunger." — John 6:35' },
+
+  { id:'walking', name:'Walking on Water', place:'Sea of Galilee', coord:[35.60, 32.85],
+    ref:'Matthew 14:22–33', order:12,
+    desc:'In the fourth watch of the night Jesus went unto them, walking on the sea. Peter also walked on the water to come to Jesus, but seeing the wind boisterous, he was afraid.',
+    scripture:'"Be of good cheer; it is I; be not afraid." — Matthew 14:27' },
+
+  { id:'samaritan', name:'The Samaritan Woman', place:'Jacob\'s Well, Sychar', coord:[35.282, 32.210],
+    ref:'John 4:1–42', order:13,
+    desc:'Wearied with His journey, Jesus sat at the well of Jacob and asked a Samaritan woman for water, and revealed Himself as the giver of living water.',
+    scripture:'"Whosoever drinketh of the water that I shall give him shall never thirst." — John 4:14' },
+
+  { id:'transfig', name:'The Transfiguration', place:'Mount Tabor', coord:[35.390, 32.687],
+    ref:'Matthew 17:1–8', order:14,
+    desc:'He was transfigured before them: his face did shine as the sun, and his raiment was white as the light. Moses and Elijah appeared talking with Him.',
+    scripture:'"This is my beloved Son, in whom I am well pleased; hear ye him." — Matthew 17:5' },
+
+  { id:'lazarus', name:'Raising of Lazarus', place:'Bethany', coord:[35.262, 31.772],
+    ref:'John 11:1–44', order:15,
+    desc:'Coming to the tomb where Lazarus had lain four days, Jesus wept, and cried with a loud voice, Lazarus, come forth! And he that was dead came forth.',
+    scripture:'"I am the resurrection, and the life." — John 11:25' },
+
+  { id:'jericho', name:'Zacchaeus & Bartimaeus', place:'Jericho', coord:[35.444, 31.857],
+    ref:'Luke 19:1–10; Mark 10:46–52', order:16,
+    desc:'Passing through Jericho, Jesus called Zacchaeus down from the sycamore tree, and gave sight to blind Bartimaeus by the wayside.',
+    scripture:'"The Son of man is come to seek and to save that which was lost." — Luke 19:10' },
+
+  { id:'entry', name:'Triumphal Entry', place:'Jerusalem (from Bethphage)', coord:[35.246, 31.776],
+    ref:'Matthew 21:1–11', order:17,
+    desc:'Riding upon a colt, Jesus entered Jerusalem. The multitudes spread their garments and palm branches in the way, crying Hosanna to the Son of David.',
+    scripture:'"Blessed is he that cometh in the name of the Lord." — Matthew 21:9' },
+
+  { id:'lastsupper', name:'The Last Supper', place:'Upper Room, Mount Zion', coord:[35.229, 31.772],
+    ref:'Luke 22:7–20', order:18,
+    desc:'In a large upper room furnished, Jesus took bread and gave thanks, and brake it; and the cup likewise, saying, This do in remembrance of me.',
+    scripture:'"This is my body which is given for you." — Luke 22:19' },
+
+  { id:'gethsemane', name:'Agony in Gethsemane', place:'Garden of Gethsemane, Mount of Olives', coord:[35.240, 31.779],
+    ref:'Matthew 26:36–46', order:19,
+    desc:'He kneeled down and prayed, His sweat as it were great drops of blood falling down to the ground. Then came Judas with a great multitude.',
+    scripture:'"Father, if thou be willing, remove this cup from me; nevertheless not my will, but thine, be done." — Luke 22:42' },
+
+  { id:'crucifixion', name:'The Crucifixion', place:'Golgotha, Jerusalem', coord:[35.2298, 31.7784],
+    ref:'John 19:17–30', order:20,
+    desc:'They led Him away to a place called Golgotha, the place of a skull. There they crucified Him. From the sixth hour darkness covered all the land until the ninth hour.',
+    scripture:'"It is finished." — John 19:30' },
+
+  { id:'resurrection', name:'The Resurrection', place:'Garden Tomb, Jerusalem', coord:[35.2300, 31.7826],
+    ref:'Matthew 28:1–10', order:21,
+    desc:'On the first day of the week, very early in the morning, the women came to the sepulchre. The stone was rolled away. He is not here: for He is risen, as He said.',
+    scripture:'"He is not here: for he is risen, as he said." — Matthew 28:6' },
+
+  { id:'emmaus', name:'Road to Emmaus', place:'Emmaus', coord:[35.000, 31.840],
+    ref:'Luke 24:13–35', order:22,
+    desc:'Two disciples walked to Emmaus, and Jesus drew near and went with them, though their eyes were holden. He was made known to them in the breaking of bread.',
+    scripture:'"Did not our heart burn within us, while he talked with us by the way?" — Luke 24:32' },
+
+  { id:'ascension', name:'The Ascension', place:'Mount of Olives, Bethany', coord:[35.245, 31.778],
+    ref:'Acts 1:9–11', order:23,
+    desc:'He led them out as far as Bethany, and lifting up His hands, He blessed them. While they beheld, He was taken up; and a cloud received Him out of their sight.',
+    scripture:'"This same Jesus… shall so come in like manner as ye have seen him go into heaven." — Acts 1:11' }
+];
+
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+
+/* ===================== OLD TESTAMENT EVENTS ===================== */
+// Important locations & events from the Hebrew Bible / Old Testament.
+// Marked with a different colour (lapis-blue) to distinguish from NT (gold).
+const OT_EVENTS = [
+  { id:'ot-ararat', name:'Noah\'s Ark resting on Mt. Ararat', place:'Mt. Ararat (off-map east)', coord:[36.65, 33.45],
+    ref:'Genesis 8:4', order:1,
+    desc:'After the Flood, the ark rested upon the mountains of Ararat. Although Ararat lies far north-east of this map, an arrow points toward it from the map\'s edge.',
+    scripture:'"And the ark rested in the seventh month, upon the mountains of Ararat." — Genesis 8:4' },
+  { id:'ot-ur', name:'Abram called from Ur', place:'Ur of the Chaldeans (origin)', coord:[36.60, 31.50],
+    ref:'Genesis 12:1–4', order:2,
+    desc:'God called Abram out of Ur of the Chaldeans (in southern Mesopotamia, off-map east) to journey to the land that He would show him.',
+    scripture:'"Get thee out of thy country… unto a land that I will shew thee." — Genesis 12:1' },
+  { id:'ot-shechem', name:'Abraham at Shechem — promise of the land', place:'Shechem', coord:[35.28, 32.21],
+    ref:'Genesis 12:6–7', order:3,
+    desc:'Abram passed through unto the place of Shechem, unto the plain of Moreh. There the LORD appeared to Abram and said, Unto thy seed will I give this land.',
+    scripture:'"Unto thy seed will I give this land." — Genesis 12:7' },
+  { id:'ot-moriah', name:'Sacrifice of Isaac', place:'Mount Moriah, Jerusalem', coord:[35.236, 31.778],
+    ref:'Genesis 22:1–14', order:4,
+    desc:'Abraham was tested: take now thy son, thine only son Isaac, whom thou lovest, and offer him there for a burnt offering upon one of the mountains. The LORD provided a ram in the thicket.',
+    scripture:'"The LORD will provide." — Genesis 22:14' },
+  { id:'ot-bethel', name:'Jacob\'s Ladder', place:'Bethel', coord:[35.215, 31.929],
+    ref:'Genesis 28:10–22', order:5,
+    desc:'Jacob lighted upon a place and tarried there all night, and dreamed of a ladder set up on the earth, the top of it reaching to heaven, with angels of God ascending and descending.',
+    scripture:'"This is none other but the house of God, and this is the gate of heaven." — Genesis 28:17' },
+  { id:'ot-hebron', name:'Cave of Machpelah — patriarchs\' tomb', place:'Hebron', coord:[35.10, 31.53],
+    ref:'Genesis 23; 49:29–32', order:6,
+    desc:'Abraham bought the field and cave of Machpelah from Ephron the Hittite to bury Sarah. Abraham, Isaac, Jacob and their wives are buried here.',
+    scripture:'"Bury me with my fathers in the cave that is in the field of Ephron the Hittite." — Genesis 49:29' },
+  { id:'ot-sinai', name:'Giving of the Law on Mount Sinai', place:'Mount Sinai (Horeb)', coord:[33.97, 29.50],
+    ref:'Exodus 19–20', order:7,
+    desc:'Moses went up unto God, and the LORD called unto him out of the mountain. And God spake all these words: I am the LORD thy God… (the Ten Commandments).',
+    scripture:'"I am the LORD thy God, which have brought thee out of the land of Egypt." — Exodus 20:2' },
+  { id:'ot-redsea', name:'Crossing of the Red Sea', place:'Red Sea (Yam Suph)', coord:[34.20, 29.70],
+    ref:'Exodus 14:21–31', order:8,
+    desc:'Moses stretched out his hand over the sea; and the LORD caused the sea to go back by a strong east wind, and made the sea dry land, and the children of Israel went through.',
+    scripture:'"The LORD shall fight for you, and ye shall hold your peace." — Exodus 14:14' },
+  { id:'ot-kadesh', name:'Kadesh-Barnea — wandering in the wilderness', place:'Kadesh-Barnea', coord:[34.50, 30.65],
+    ref:'Numbers 13–14', order:9,
+    desc:'From Kadesh-Barnea Moses sent twelve spies into the land of Canaan. Because of unbelief, Israel wandered forty years in the wilderness of Paran.',
+    scripture:'"How long shall I bear with this evil congregation?" — Numbers 14:27' },
+  { id:'ot-nebo', name:'Death of Moses on Mt. Nebo', place:'Mount Nebo, Moab', coord:[35.725, 31.768],
+    ref:'Deuteronomy 34', order:10,
+    desc:'Moses went up from the plains of Moab unto Mount Nebo, and the LORD shewed him all the land. There Moses died, and was buried in a valley in Moab.',
+    scripture:'"I have caused thee to see it with thine eyes, but thou shalt not go over thither." — Deut 34:4' },
+  { id:'ot-jordan', name:'Israel crosses the Jordan', place:'Jordan, opposite Jericho', coord:[35.52, 31.86],
+    ref:'Joshua 3:14–17', order:11,
+    desc:'When the priests bearing the ark dipped their feet in the brim of the water, the waters which came down from above stood and rose up upon an heap. The people passed over right against Jericho.',
+    scripture:'"This day will I begin to magnify thee in the sight of all Israel." — Joshua 3:7' },
+  { id:'ot-jerichofall', name:'Walls of Jericho fall', place:'Jericho', coord:[35.444, 31.860],
+    ref:'Joshua 6', order:12,
+    desc:'Israel compassed the city seven days. On the seventh day, when the priests blew the trumpets and the people shouted with a great shout, the wall fell down flat.',
+    scripture:'"Shout; for the LORD hath given you the city." — Joshua 6:16' },
+  { id:'ot-ai', name:'Defeat & Victory at Ai', place:'Ai', coord:[35.26, 31.92],
+    ref:'Joshua 7–8', order:13,
+    desc:'Because of Achan\'s sin, Israel was first defeated at Ai. After repentance and the right strategy, Joshua took the city by ambush.',
+    scripture:'"Israel hath sinned." — Joshua 7:11' },
+  { id:'ot-shiloh', name:'Tabernacle at Shiloh', place:'Shiloh', coord:[35.29, 32.06],
+    ref:'Joshua 18:1; 1 Sam 1', order:14,
+    desc:'The whole congregation of the children of Israel assembled together at Shiloh, and set up the tabernacle of the congregation there. Hannah\'s son Samuel served the LORD here.',
+    scripture:'"For this child I prayed; and the LORD hath given me my petition." — 1 Samuel 1:27' },
+  { id:'ot-gilboa', name:'Death of Saul on Mt. Gilboa', place:'Mt. Gilboa', coord:[35.42, 32.50],
+    ref:'1 Samuel 31', order:15,
+    desc:'The Philistines fought against Israel at Mount Gilboa. Saul and his three sons died there. David lamented: How are the mighty fallen!',
+    scripture:'"Tell it not in Gath; the beauty of Israel is slain upon thy high places!" — 2 Samuel 1:19–20' },
+  { id:'ot-davidanointed', name:'David anointed king', place:'Bethlehem (anointing) / Hebron (crowned)', coord:[35.20, 31.53],
+    ref:'1 Samuel 16; 2 Sam 5', order:16,
+    desc:'Samuel anointed David at Bethlehem; later David was anointed king over all Israel at Hebron, where he reigned seven years before taking Jerusalem.',
+    scripture:'"The LORD looketh on the heart." — 1 Samuel 16:7' },
+  { id:'ot-elah', name:'David & Goliath', place:'Valley of Elah', coord:[34.95, 31.69],
+    ref:'1 Samuel 17', order:17,
+    desc:'In the Valley of Elah, the shepherd boy David, with sling and stone, slew the Philistine champion Goliath of Gath, in the name of the LORD of hosts.',
+    scripture:'"Thou comest to me with a sword… but I come to thee in the name of the LORD of hosts." — 1 Samuel 17:45' },
+  { id:'ot-davidcity', name:'David takes Jerusalem', place:'City of David, Jerusalem', coord:[35.236, 31.774],
+    ref:'2 Samuel 5:6–10', order:18,
+    desc:'David took the strong hold of Zion (the Jebusite fortress), and dwelt in it, and called it the city of David. He brought up the ark to Jerusalem.',
+    scripture:'"David went on, and grew great, and the LORD God of hosts was with him." — 2 Samuel 5:10' },
+  { id:'ot-temple', name:'Solomon builds the Temple', place:'Mount Moriah, Jerusalem', coord:[35.235, 31.778],
+    ref:'1 Kings 6–8', order:19,
+    desc:'Solomon began to build the house of the LORD in Jerusalem in mount Moriah. After seven years it was finished, and the glory of the LORD filled the house.',
+    scripture:'"I have surely built thee an house to dwell in, a settled place for thee to abide in for ever." — 1 Kings 8:13' },
+  { id:'ot-carmel', name:'Elijah on Mt. Carmel', place:'Mount Carmel', coord:[35.05, 32.72],
+    ref:'1 Kings 18', order:20,
+    desc:'Elijah challenged the prophets of Baal on Mt. Carmel. The fire of the LORD fell, and consumed the burnt sacrifice. The people fell on their faces: The LORD, He is the God!',
+    scripture:'"How long halt ye between two opinions?" — 1 Kings 18:21' },
+  { id:'ot-samaria', name:'Capital of Northern Kingdom', place:'Samaria (Sebaste)', coord:[35.19, 32.28],
+    ref:'1 Kings 16:24', order:21,
+    desc:'Omri bought the hill Samaria of Shemer for two talents of silver, and built on the hill, and called the name of the city Samaria. Capital of the northern kingdom of Israel.',
+    scripture:'"He bought the hill Samaria of Shemer." — 1 Kings 16:24' },
+  { id:'ot-niniveh', name:'Jonah sent to Nineveh', place:'Joppa (departure port)', coord:[34.75, 32.05],
+    ref:'Jonah 1:3', order:22,
+    desc:'Jonah rose up to flee unto Tarshish from the presence of the LORD, and went down to Joppa, and found a ship going to Tarshish. The great fish returned him; he then preached at Nineveh.',
+    scripture:'"Yet forty days, and Nineveh shall be overthrown." — Jonah 3:4' },
+  { id:'ot-fall', name:'Fall of Samaria — Israel exiled', place:'Samaria', coord:[35.20, 32.28],
+    ref:'2 Kings 17', order:23,
+    desc:'In the ninth year of Hoshea the king of Assyria took Samaria, and carried Israel away into Assyria — for they had not hearkened unto the voice of the LORD their God.',
+    scripture:'"They had not hearkened unto the voice of the LORD their God." — 2 Kings 18:12' },
+  { id:'ot-fallj', name:'Fall of Jerusalem — Babylonian exile', place:'Jerusalem', coord:[35.234, 31.776],
+    ref:'2 Kings 25; Lam.', order:24,
+    desc:'Nebuchadnezzar king of Babylon burnt the house of the LORD, and the king\'s house, and all the houses of Jerusalem, and broke down the walls. Judah was carried away captive.',
+    scripture:'"How doth the city sit solitary, that was full of people!" — Lamentations 1:1' },
+  { id:'ot-return', name:'Return from Exile — rebuilding the Temple', place:'Jerusalem', coord:[35.236, 31.778],
+    ref:'Ezra 1; Nehemiah', order:25,
+    desc:'Cyrus king of Persia decreed: The LORD God of heaven hath charged me to build him an house at Jerusalem. Ezra rebuilt the Temple; Nehemiah rebuilt the wall.',
+    scripture:'"Whosoever there is among you of all his people, let him go up." — Ezra 1:3' },
+  // ---- Cycle 3 additions ----
+  { id:'ot-sodom', name:'Destruction of Sodom & Gomorrah', place:'Plains by the Dead Sea', coord:[35.40, 31.10],
+    ref:'Genesis 19', order:26,
+    desc:'The LORD rained upon Sodom and upon Gomorrah brimstone and fire. He overthrew those cities, and all the plain, and all the inhabitants. Lot\'s wife looked back and became a pillar of salt.',
+    scripture:'"Escape for thy life; look not behind thee." — Genesis 19:17' },
+  { id:'ot-jacobwell', name:"Jacob's well at Sychar", place:'Sychar (near Shechem)', coord:[35.282, 32.210],
+    ref:'Genesis 33; John 4', order:27,
+    desc:'Jacob bought a parcel of a field at the hand of the children of Hamor, and erected an altar. The well he dug there became famous; centuries later Jesus would meet a Samaritan woman at this very well.',
+    scripture:'"And Jacob came to Shalem, a city of Shechem." — Genesis 33:18' },
+  { id:'ot-shilohh', name:"Hannah's prayer & call of Samuel", place:'Shiloh', coord:[35.29, 32.06],
+    ref:'1 Samuel 1–3', order:28,
+    desc:'Hannah wept sore, and prayed, and the LORD remembered her. She bare a son, and called him Samuel. The boy ministered before the LORD; and the LORD called him in the night.',
+    scripture:'"Speak, LORD; for thy servant heareth." — 1 Samuel 3:9' },
+  { id:'ot-megiddo', name:"Death of King Josiah at Megiddo", place:'Megiddo', coord:[35.18, 32.59],
+    ref:'2 Kings 23:29–30', order:29,
+    desc:'Pharaoh Necho king of Egypt went up against the king of Assyria; and king Josiah went out against him, and the archers shot at him at Megiddo. He was slain — Megiddo, prefigured Armageddon.',
+    scripture:'"All Judah and Jerusalem mourned for Josiah." — 2 Chron. 35:24' },
+  { id:'ot-elijahsinai', name:'Elijah at Mt. Horeb — still small voice', place:'Mt. Sinai / Horeb', coord:[33.97, 29.55],
+    ref:'1 Kings 19', order:30,
+    desc:'Elijah went forty days unto Horeb. A great wind, an earthquake, and a fire passed by; but the LORD was not in them. And after the fire a still small voice — and Elijah wrapped his face in his mantle.',
+    scripture:'"What doest thou here, Elijah?" — 1 Kings 19:13' },
+  { id:'ot-naaman', name:'Naaman healed in the Jordan', place:'Jordan River', coord:[35.54, 32.30],
+    ref:'2 Kings 5', order:31,
+    desc:'Naaman the Syrian, leper, went down and dipped himself seven times in Jordan, according to the saying of Elisha; and his flesh came again like the flesh of a little child, and he was clean.',
+    scripture:'"There is no God in all the earth, but in Israel." — 2 Kings 5:15' },
+];
+
+/* ===================== ACTS / PAUL EVENTS ===================== */
+// Important events from the book of Acts and Paul's missionary journeys.
+// Most happen on / near the Levant; a few off-map locations placed at the
+// nearest map edge as "off-map markers" pointing toward the real city.
+const PAUL_EVENTS = [
+  { id:'paul-pentecost', name:'Pentecost — birth of the Church', place:'Upper Room, Jerusalem', coord:[35.230, 31.772],
+    ref:'Acts 2', order:1,
+    desc:'When the day of Pentecost was fully come, the disciples were all with one accord in one place. Suddenly there came a sound from heaven as of a rushing mighty wind, and tongues like fire sat upon each of them.',
+    scripture:'"They were all filled with the Holy Ghost." — Acts 2:4' },
+  { id:'paul-stephen', name:'Martyrdom of Stephen', place:'Outside Jerusalem', coord:[35.250, 31.785],
+    ref:'Acts 7:54–60', order:2,
+    desc:'Stephen, full of the Holy Ghost, looked stedfastly into heaven and saw the glory of God. They cast him out of the city and stoned him; Saul was consenting unto his death.',
+    scripture:'"Lord, lay not this sin to their charge." — Acts 7:60' },
+  { id:'paul-philip', name:'Philip & the Ethiopian eunuch', place:'Road to Gaza', coord:[34.55, 31.55],
+    ref:'Acts 8:26–40', order:3,
+    desc:'Philip was sent unto the way that goeth down from Jerusalem unto Gaza. He met an Ethiopian eunuch reading Isaiah, preached Jesus to him, and baptised him.',
+    scripture:'"Here is water; what doth hinder me to be baptized?" — Acts 8:36' },
+  { id:'paul-damascus', name:"Saul's conversion on the Damascus road", place:'Road to Damascus', coord:[36.30, 33.50],
+    ref:'Acts 9:1–19', order:4,
+    desc:'As he journeyed toward Damascus, suddenly there shined round about him a light from heaven. He fell to the earth and heard a voice: Saul, Saul, why persecutest thou me?',
+    scripture:'"I am Jesus whom thou persecutest." — Acts 9:5' },
+  { id:'paul-cornelius', name:"Peter & Cornelius — Gospel to the Gentiles", place:'Caesarea Maritima', coord:[34.89, 32.50],
+    ref:'Acts 10', order:5,
+    desc:'Cornelius the centurion at Caesarea sent for Peter. While Peter yet spake, the Holy Ghost fell on all that heard the word — and the Gentiles received the Spirit also.',
+    scripture:'"Of a truth I perceive that God is no respecter of persons." — Acts 10:34' },
+  { id:'paul-antioch', name:'Church at Antioch — believers first called Christians', place:'Antioch on the Orontes', coord:[36.50, 33.55],
+    ref:'Acts 11:19–26', order:6,
+    desc:'Much people were added unto the Lord at Antioch. Barnabas brought Saul there; for a whole year they taught much people. The disciples were called Christians first in Antioch.',
+    scripture:'"The disciples were called Christians first in Antioch." — Acts 11:26' },
+  { id:'paul-peter-prison', name:"Peter delivered from prison", place:'Jerusalem', coord:[35.232, 31.780],
+    ref:'Acts 12:1–17', order:7,
+    desc:'Herod laid hands on certain of the church and killed James. He took Peter also and put him in prison; but the church prayed without ceasing, and an angel of the Lord delivered Peter.',
+    scripture:'"Now I know of a surety, that the Lord hath sent his angel." — Acts 12:11' },
+  { id:'paul-j1-start', name:'1st Missionary Journey — sent from Antioch', place:'Antioch', coord:[36.45, 33.55],
+    ref:'Acts 13:1–4', order:8,
+    desc:'As they ministered to the Lord and fasted, the Holy Ghost said, Separate me Barnabas and Saul for the work whereunto I have called them. They sailed unto Cyprus.',
+    scripture:'"Separate me Barnabas and Saul for the work whereunto I have called them." — Acts 13:2' },
+  { id:'paul-cyprus', name:'Cyprus — Elymas the sorcerer', place:'Paphos, Cyprus', coord:[36.05, 33.40],
+    ref:'Acts 13:6–12', order:9,
+    desc:'At Paphos they encountered Bar-Jesus (Elymas), a sorcerer. Saul (also called Paul) struck him blind. The deputy Sergius Paulus believed.',
+    scripture:'"O full of all subtilty… wilt thou not cease to pervert the right ways of the Lord?" — Acts 13:10' },
+  { id:'paul-galatia', name:'Galatia — Derbe, Lystra, Iconium', place:'Asia Minor (off-map NW)', coord:[36.30, 33.55],
+    ref:'Acts 14', order:10,
+    desc:'In Lystra Paul healed a lame man, was hailed as a god, then stoned and left for dead. He revived and went on to Derbe, then returned, ordaining elders in every church.',
+    scripture:'"We must through much tribulation enter into the kingdom of God." — Acts 14:22' },
+  { id:'paul-council', name:'Council of Jerusalem', place:'Jerusalem', coord:[35.234, 31.776],
+    ref:'Acts 15', order:11,
+    desc:'The apostles and elders came together to consider whether Gentile believers must be circumcised. James gave the verdict — that we trouble not them which from among the Gentiles are turned to God.',
+    scripture:'"It seemed good to the Holy Ghost, and to us." — Acts 15:28' },
+  { id:'paul-macedonia', name:'2nd Journey — Macedonian call', place:'Troas → Philippi', coord:[36.20, 33.50],
+    ref:'Acts 16:6–10', order:12,
+    desc:'A vision appeared to Paul in the night: a man of Macedonia stood, prayed him, saying, Come over into Macedonia, and help us. They concluded the Lord had called them.',
+    scripture:'"Come over into Macedonia, and help us." — Acts 16:9' },
+  { id:'paul-philippi', name:'Philippi — jailer converted', place:'Philippi, Macedonia (off-map NW)', coord:[36.10, 33.55],
+    ref:'Acts 16:16–34', order:13,
+    desc:'Paul and Silas were beaten and cast into prison. At midnight they sang praises; an earthquake shook the foundations. The jailer cried, What must I do to be saved?',
+    scripture:'"Believe on the Lord Jesus Christ, and thou shalt be saved." — Acts 16:31' },
+  { id:'paul-areopagus', name:'Athens — sermon on the Areopagus', place:'Athens (off-map NW)', coord:[36.00, 33.60],
+    ref:'Acts 17:16–34', order:14,
+    desc:'Paul stood in the midst of Mars\' hill: I perceive that in all things ye are too superstitious. Whom therefore ye ignorantly worship, him declare I unto you — the unknown God.',
+    scripture:'"In him we live, and move, and have our being." — Acts 17:28' },
+  { id:'paul-corinth', name:'Corinth — 18 months ministry', place:'Corinth (off-map NW)', coord:[35.85, 33.60],
+    ref:'Acts 18:1–18', order:15,
+    desc:'Paul abode at Corinth eighteen months, teaching the word of God. Crispus, the chief ruler of the synagogue, believed; many Corinthians believed and were baptised.',
+    scripture:'"Be not afraid… for I am with thee. I have much people in this city." — Acts 18:9–10' },
+  { id:'paul-ephesus', name:'Ephesus — 3 years ministry, riot of silversmiths', place:'Ephesus (off-map NW)', coord:[36.20, 33.40],
+    ref:'Acts 19', order:16,
+    desc:'Paul taught two years in the school of Tyrannus. Demetrius the silversmith stirred up a riot — Great is Diana of the Ephesians! — for two hours.',
+    scripture:'"All they which dwelt in Asia heard the word of the Lord Jesus." — Acts 19:10' },
+  { id:'paul-miletus', name:"Farewell at Miletus", place:'Miletus (off-map NW)', coord:[36.15, 33.30],
+    ref:'Acts 20:17–38', order:17,
+    desc:'Paul called for the elders of the Ephesian church to Miletus. He kneeled down and prayed with them all; they wept sore, sorrowing most that they should see his face no more.',
+    scripture:'"I have not shunned to declare unto you all the counsel of God." — Acts 20:27' },
+  { id:'paul-tyre', name:'Prophetic warning at Tyre & Caesarea', place:'Tyre / Caesarea', coord:[35.20, 33.27],
+    ref:'Acts 21:1–14', order:18,
+    desc:'At Tyre, the disciples warned Paul not to go up to Jerusalem. At Caesarea, Agabus took Paul\'s girdle and prophesied his binding. Paul answered: I am ready also to die.',
+    scripture:'"The will of the Lord be done." — Acts 21:14' },
+  { id:'paul-arrest', name:"Paul's arrest at the Temple", place:'Jerusalem', coord:[35.236, 31.778],
+    ref:'Acts 21:27–36', order:19,
+    desc:'The Jews of Asia stirred up the multitude in the Temple. They laid hands on Paul; the chief captain rescued him from the mob. Paul was bound with two chains.',
+    scripture:'"Away with him!" — Acts 21:36' },
+  { id:'paul-caesarea', name:'Trials before Felix, Festus, & Agrippa', place:'Caesarea Maritima', coord:[34.89, 32.50],
+    ref:'Acts 24–26', order:20,
+    desc:'Paul was sent to Caesarea where he stood trial before Felix, Festus, and king Agrippa. He testified of his calling, and Agrippa said: Almost thou persuadest me to be a Christian.',
+    scripture:'"I appeal unto Caesar." — Acts 25:11' },
+  { id:'paul-shipwreck', name:'Shipwreck on Malta', place:'Malta (off-map W)', coord:[33.85, 31.50],
+    ref:'Acts 27–28', order:21,
+    desc:'On the voyage to Rome, an Euroclydon wind drove them fourteen days. The ship broke; all 276 souls came safe to land on the island called Melita (Malta).',
+    scripture:'"There shall be no loss of any man\'s life among you, but of the ship." — Acts 27:22' },
+  { id:'paul-rome', name:'Paul reaches Rome — preaches in chains', place:'Rome (off-map W)', coord:[33.85, 32.40],
+    ref:'Acts 28:16–31', order:22,
+    desc:'When we came to Rome, Paul was permitted to dwell by himself with a soldier that kept him. For two whole years he received all that came in unto him, preaching the kingdom of God.',
+    scripture:'"Preaching the kingdom of God, and teaching those things which concern the Lord Jesus Christ." — Acts 28:31' },
+];
+
+// Tag every event with its layer. Merge OT and Paul events into the global EVENTS list so
+// every existing label / marker code path automatically applies.
+EVENTS.forEach(e => { e.layer = 'nt'; });
+OT_EVENTS.forEach(e => { e.layer = 'ot'; EVENTS.push(e); });
+PAUL_EVENTS.forEach(e => { e.layer = 'paul'; EVENTS.push(e); });
+
+// Approximate dates (BC = negative, AD = positive).  These are scholarly best
+// estimates; patriarchs use traditional Ussher-style numbers.
+const EVENT_YEARS = {
+  'ot-ararat':-2350,'ot-ur':-2091,'ot-shechem':-2091,'ot-moriah':-2050,
+  'ot-bethel':-1928,'ot-hebron':-1860,'ot-sinai':-1446,'ot-redsea':-1446,
+  'ot-kadesh':-1444,'ot-nebo':-1406,'ot-jordan':-1406,'ot-jerichofall':-1406,
+  'ot-ai':-1405,'ot-shiloh':-1380,'ot-gilboa':-1010,'ot-davidanointed':-1025,
+  'ot-elah':-1020,'ot-davidcity':-1003,'ot-temple':-966,'ot-carmel':-870,
+  'ot-samaria':-880,'ot-niniveh':-785,'ot-fall':-722,'ot-fallj':-586,'ot-return':-538,
+  // ---- Cycle 3 additions ----
+  'ot-sodom':-2067,'ot-jacobwell':-1900,'ot-shilohh':-1100,
+  'ot-megiddo':-609,'ot-elijahsinai':-860,'ot-naaman':-840,
+  annunciation:-5,nativity:-4,presentation:-4,flight:-4,
+  baptism:27,temptation:27,cana:27,capernaum:28,sermon:28,storm:28,
+  feeding:29,walking:29,samaritan:28,transfig:29,lazarus:30,jericho:30,
+  entry:30,lastsupper:30,gethsemane:30,crucifixion:30,resurrection:30,
+  emmaus:30,ascension:30,
+  'paul-pentecost':30,'paul-stephen':35,'paul-philip':35,'paul-damascus':35,
+  'paul-cornelius':40,'paul-antioch':43,'paul-peter-prison':44,
+  'paul-j1-start':46,'paul-cyprus':47,'paul-galatia':48,'paul-council':49,
+  'paul-macedonia':50,'paul-philippi':50,'paul-areopagus':51,'paul-corinth':52,
+  'paul-ephesus':55,'paul-miletus':57,'paul-tyre':57,'paul-arrest':58,
+  'paul-caesarea':59,'paul-shipwreck':60,'paul-rome':61,
+};
+EVENTS.forEach(e => { e.year = EVENT_YEARS[e.id]; });
+
+// Each event has an "effect" — a small 3D animation that spawns when the
+// event's panel is opened.  Effects are parametric (defined in EFFECTS map
+// below) so we get rich variety without per-event JS classes.
+const EVENT_EFFECTS = {
+  // ---- NT (Life of Christ) ----
+  annunciation:  'dove_descending',     // angel light + dove
+  nativity:      'star_of_bethlehem',   // star pillar of light
+  presentation:  'altar_smoke',
+  flight:        'caravan',             // moving dots southward
+  baptism:       'water_dove',          // ripples + dove descending
+  temptation:    'wilderness_wind',     // dust devils
+  cana:          'wine_pouring',        // jars + red ripple
+  capernaum:     'fishing_boats',
+  sermon:        'glow_radiance',       // golden rays from a hilltop
+  storm:         'storm_calm',          // wind+wave then sudden stillness
+  feeding:       'loaves_fishes',       // floating loaves + fish
+  walking:       'walking_water',       // ripple footprints across the lake
+  samaritan:     'well_water',
+  transfig:      'transfiguration_burst', // pillar of white light
+  lazarus:       'tomb_open',           // stone rolls + light from cave
+  jericho:       'sycamore_tree',
+  entry:         'palm_petals',         // palm fronds falling
+  lastsupper:    'cup_bread',
+  gethsemane:    'olive_drops',         // sweat-blood drops
+  crucifixion:   'cross_eclipse',       // 3 crosses + dark sky
+  resurrection:  'empty_tomb_radiance',
+  emmaus:        'walking_companions',
+  ascension:     'cloud_ascending',     // figure rising into a cloud
+
+  // ---- OT ----
+  'ot-ararat':       'rainbow_dove',
+  'ot-ur':           'caravan',
+  'ot-shechem':      'altar_smoke',
+  'ot-moriah':       'altar_fire',
+  'ot-bethel':       'jacob_ladder',
+  'ot-hebron':       'tomb_open',
+  'ot-sinai':        'sinai_fire',          // smoke + fire on mountain
+  'ot-redsea':       'sea_parting',
+  'ot-kadesh':       'wilderness_wind',
+  'ot-nebo':         'mountain_view',
+  'ot-jordan':       'sea_parting',         // Jordan stops
+  'ot-jerichofall':  'walls_collapse',
+  'ot-ai':           'sword_smoke',
+  'ot-shiloh':       'tabernacle',
+  'ot-gilboa':       'sword_smoke',
+  'ot-davidanointed':'oil_anointing',       // oil drips
+  'ot-elah':         'sling_strike',
+  'ot-davidcity':    'crown_radiance',
+  'ot-temple':       'temple_columns',
+  'ot-carmel':       'fire_from_heaven',    // pillar of fire
+  'ot-samaria':      'crown_radiance',
+  'ot-niniveh':      'sailing_ship',        // Jonah's ship
+  'ot-fall':         'walls_collapse',
+  'ot-fallj':        'temple_burning',
+  'ot-return':       'temple_columns',
+  'ot-sodom':        'brimstone_fire',      // burning + ash
+  'ot-jacobwell':    'well_water',
+  'ot-shilohh':      'tabernacle',
+  'ot-megiddo':      'sword_smoke',
+  'ot-elijahsinai':  'sinai_fire',
+  'ot-naaman':       'water_dove',          // healed in Jordan
+
+  // ---- ACTS / PAUL ----
+  'paul-pentecost':    'flame_tongues',     // tongues of fire above heads
+  'paul-stephen':      'martyr_stones',
+  'paul-philip':       'caravan',
+  'paul-damascus':     'damascus_light',    // blinding light
+  'paul-cornelius':    'dove_descending',
+  'paul-antioch':      'glow_radiance',
+  'paul-peter-prison': 'chains_break',      // breaking chains
+  'paul-j1-start':     'sailing_ship',
+  'paul-cyprus':       'sailing_ship',
+  'paul-galatia':      'caravan',
+  'paul-council':      'altar_smoke',
+  'paul-macedonia':    'sailing_ship',
+  'paul-philippi':     'chains_break',
+  'paul-areopagus':    'temple_columns',
+  'paul-corinth':      'glow_radiance',
+  'paul-ephesus':      'temple_columns',
+  'paul-miletus':      'sailing_ship',
+  'paul-tyre':         'sailing_ship',
+  'paul-arrest':       'martyr_stones',
+  'paul-caesarea':     'glow_radiance',
+  'paul-shipwreck':    'storm_calm',
+  'paul-rome':         'crown_radiance',
+};
+EVENTS.forEach(e => { e.effect = EVENT_EFFECTS[e.id] || 'glow_radiance'; });
+
+// Era stops for the timeline scrubber labels.
+const ERAS = [
+  { from:-2400, to:-1500, en:'Patriarchs',                  zh:'族长时代'        },
+  { from:-1500, to:-1000, en:'Exodus & Conquest',           zh:'出埃及与征服'    },
+  { from:-1000, to: -586, en:'United & Divided Kingdom',    zh:'王国时代'        },
+  { from: -586, to: -400, en:'Exile & Return',              zh:'被掳与归回'      },
+  { from:   -5, to:   35, en:'Life of Christ',              zh:'基督生平'        },
+  { from:   35, to:   65, en:'Apostolic Age',               zh:'使徒时代'        },
+];
+
+// Layer visibility flags (NT shown by default; OT and PAUL hidden by default).
+const LAYER_VISIBLE = { nt: true, ot: false, paul: false };
+
+/* ===================== CHINESE TRANSLATIONS ===================== */
+// Keyed by event id; merges into EVENTS at startup.
+const EVENTS_ZH = {
+  annunciation: {
+    name:'天使报喜', place:'拿撒勒',
+    desc:'天使加百列奉上帝差遣，到拿撒勒一位名叫马利亚的童女那里，告诉她将要怀孕生子，他要被称为至高者的儿子。',
+    scripture:'"我是主的使女，情愿照你的话成就在我身上。" —— 路加福音 1:38' },
+  nativity: {
+    name:'主耶稣降生', place:'伯利恒',
+    desc:'罗马皇帝奥古斯都报名上册之时，耶稣生于伯利恒的马槽里。牧羊人闻天使天军颂赞之声，急忙前来朝拜。',
+    scripture:'"今天在大卫的城里，为你们生了救主，就是主基督。" —— 路加福音 2:11' },
+  presentation: {
+    name:'献主于圣殿', place:'耶路撒冷',
+    desc:'婴孩出生四十日后，马利亚和约瑟带着孩童耶稣上耶路撒冷圣殿。西面将祂抱起，称颂上帝；女先知亚拿亦感谢主。',
+    scripture:'"我的眼睛已经看见你的救恩。" —— 路加福音 2:30' },
+  flight: {
+    name:'逃往埃及', place:'埃及（取道西奈）',
+    desc:'约瑟在梦中得主使指示，恐希律加害，便夜起带着小孩子和母亲逃往埃及，应验先知所言。',
+    scripture:'"我从埃及召出我的儿子来。" —— 马太福音 2:15' },
+  baptism: {
+    name:'主受洗', place:'约旦河（伯大尼之外）',
+    desc:'耶稣从加利利来到约旦河，受约翰的洗。祂从水里上来，天就开了，上帝的灵仿佛鸽子降下，落在祂身上。',
+    scripture:'"这是我的爱子，我所喜悦的。" —— 马太福音 3:17' },
+  temptation: {
+    name:'旷野受试探', place:'犹大旷野',
+    desc:'圣灵将耶稣引到旷野，禁食四十昼夜，受魔鬼试探。传统认为此地在耶利哥之上的"试探山"。',
+    scripture:'"人活着，不是单靠食物，乃是靠上帝口里所出的一切话。" —— 马太福音 4:4' },
+  cana: {
+    name:'迦拿婚宴 · 首个神迹', place:'加利利的迦拿',
+    desc:'在婚宴上，耶稣将水变为酒——这是祂所行神迹的开端，显出祂的荣耀，门徒就信祂了。',
+    scripture:'"你倒把好酒留到如今！" —— 约翰福音 2:10' },
+  capernaum: {
+    name:'迦百农传道', place:'加百农，加利利海畔',
+    desc:'耶稣离开拿撒勒，往海边的迦百农去。在此召渔夫为门徒，治好彼得岳母的热病，在会堂里教训人。',
+    scripture:'"来跟从我，我要叫你们得人如得鱼一样。" —— 马太福音 4:19' },
+  sermon: {
+    name:'登山宝训', place:'加利利八福山',
+    desc:'耶稣见这许多的人，就上了山，坐下教训他们说：虚心的人有福了，温柔的人有福了，怜恤人的人有福了……',
+    scripture:'"你们是世上的光。城造在山上，是不能隐藏的。" —— 马太福音 5:14' },
+  storm: {
+    name:'平静风浪', place:'加利利海',
+    desc:'忽然起了暴风，波浪打入船内。耶稣斥责风，向海说："住了吧！静了吧！"风就止住，大大平静了。',
+    scripture:'"这到底是谁，连风和海也听从他了？" —— 马可福音 4:41' },
+  feeding: {
+    name:'五饼二鱼', place:'塔布加 / 伯赛大',
+    desc:'耶稣以五个大麦饼、两条小鱼，使五千男人吃饱，妇女孩童不计其数；剩余零碎装满了十二个篮子。',
+    scripture:'"我就是生命的粮，到我这里来的，必定不饿。" —— 约翰福音 6:35' },
+  walking: {
+    name:'海面行走', place:'加利利海',
+    desc:'夜间四更天，耶稣在海面上走，往门徒那里去。彼得也在水面上行走，往耶稣那里去；只因见风甚大，便害怕。',
+    scripture:'"你们放心！是我，不要怕！" —— 马太福音 14:27' },
+  samaritan: {
+    name:'撒玛利亚妇人', place:'雅各井 · 叙加',
+    desc:'耶稣因走路困乏，就坐在雅各井旁，向一位撒玛利亚妇人讨水喝，并向她启示自己是赐生命水活的源头。',
+    scripture:'"人若喝我所赐的水，就永远不渴。" —— 约翰福音 4:14' },
+  transfig: {
+    name:'登山变像', place:'他泊山',
+    desc:'耶稣在他们面前变了形像，脸面明亮如日头，衣裳洁白如光。又有摩西、以利亚向他们显现，与耶稣说话。',
+    scripture:'"这是我的爱子，我所喜悦的，你们要听他。" —— 马太福音 17:5' },
+  lazarus: {
+    name:'叫拉撒路复活', place:'伯大尼',
+    desc:'耶稣到了坟墓前，拉撒路已死了四天。耶稣哭了，又大声呼叫："拉撒路出来！"那死人就出来了。',
+    scripture:'"复活在我，生命也在我。" —— 约翰福音 11:25' },
+  jericho: {
+    name:'撒该与瞎子巴底买', place:'耶利哥',
+    desc:'耶稣经过耶利哥，叫税吏长撒该从桑树上下来，又开了路旁瞎子巴底买的眼睛。',
+    scripture:'"人子来，为要寻找拯救失丧的人。" —— 路加福音 19:10' },
+  entry: {
+    name:'荣进圣城', place:'耶路撒冷（自伯法其）',
+    desc:'耶稣骑驴驹进入耶路撒冷。众人将衣服、棕树枝铺在路上，高呼："和散那归于大卫的子孙！"',
+    scripture:'"奉主名来的是应当称颂的！" —— 马太福音 21:9' },
+  lastsupper: {
+    name:'最后的晚餐', place:'锡安山楼上的房间',
+    desc:'在一间宽敞陈设齐备的楼房里，耶稣拿起饼来祝谢、擘开；又照样拿起杯来，说："你们应当如此行，为的是记念我。"',
+    scripture:'"这是我的身体，为你们舍的。" —— 路加福音 22:19' },
+  gethsemane: {
+    name:'客西马尼祷告', place:'橄榄山客西马尼园',
+    desc:'耶稣跪下祷告，汗珠如大血点滴在地上。说时迟那时快，犹大领着许多人前来捉拿祂。',
+    scripture:'"父啊，你若愿意，就把这杯撤去；然而不要成就我的意思，只要成就你的意思。" —— 路加福音 22:42' },
+  crucifixion: {
+    name:'十字架受难', place:'各各他 · 耶路撒冷',
+    desc:'他们带耶稣到了一个地方，名叫各各他，就是髑髅地，在那里把祂钉在十字架上。从午正到申初，遍地都黑暗了。',
+    scripture:'"成了！" —— 约翰福音 19:30' },
+  resurrection: {
+    name:'主复活', place:'花园冢 · 耶路撒冷',
+    desc:'七日的头一日，天将亮的时候，妇女们来看坟墓。石头已经辊开了。"祂不在这里，照祂所说的，已经复活了。"',
+    scripture:'"祂不在这里，照祂所说的，已经复活了。" —— 马太福音 28:6' },
+  emmaus: {
+    name:'以马忤斯路上', place:'以马忤斯',
+    desc:'两个门徒往以马忤斯村去，耶稣亲自就近，和他们同行；只是他们的眼睛被迷糊了。直到擘饼之时，方才认出主来。',
+    scripture:'"他在路上和我们说话，给我们讲解圣经的时候，我们的心岂不是火热的吗？" —— 路加福音 24:32' },
+  ascension: {
+    name:'主升天', place:'橄榄山 · 伯大尼',
+    desc:'耶稣领他们到伯大尼的对面，举手为他们祝福。正祝福的时候，祂就离开他们，被云彩接去，他们的眼不再看见祂。',
+    scripture:'"这离开你们被接升天的耶稣，你们见祂怎样往天上去，祂还要怎样来。" —— 使徒行传 1:11' },
+
+  /* ----- Old Testament ----- */
+  'ot-ararat': { name:'方舟停于亚拉腊山', place:'亚拉腊山（图外东方）',
+    desc:'洪水之后，方舟停在亚拉腊山上。亚拉腊山在本图东北甚远之地，本图边缘以箭头指示其方向。',
+    scripture:'"七月十七日，方舟停在亚拉腊山上。" —— 创世记 8:4' },
+  'ot-ur': { name:'神召亚伯兰出迦勒底吾珥', place:'迦勒底的吾珥（起点）',
+    desc:'神召亚伯兰离开迦勒底的吾珥（位于美索不达米亚南部，在图外东方），前往神所要指示的地。',
+    scripture:'"你要离开本地、本族、父家，往我所要指示你的地去。" —— 创世记 12:1' },
+  'ot-shechem': { name:'亚伯拉罕在示剑——应许之地', place:'示剑',
+    desc:'亚伯兰经过那地，到了示剑地方摩利橡树那里。耶和华向亚伯兰显现，说：我要把这地赐给你的后裔。',
+    scripture:'"我要把这地赐给你的后裔。" —— 创世记 12:7' },
+  'ot-moriah': { name:'献以撒', place:'摩利亚山 · 耶路撒冷',
+    desc:'神试验亚伯拉罕：你带着你的儿子，就是你独生的儿子，你所爱的以撒，往摩利亚地去，在那里把他献为燔祭。神预备公羊代替。',
+    scripture:'"耶和华必预备。" —— 创世记 22:14' },
+  'ot-bethel': { name:'雅各的天梯', place:'伯特利',
+    desc:'雅各在一个地方躺卧睡觉，梦见一个梯子立在地上，梯子的头顶着天，有神的使者在梯子上，上去下来。',
+    scripture:'"这不是别的，乃是神的殿，也是天的门。" —— 创世记 28:17' },
+  'ot-hebron': { name:'麦比拉洞——列祖之墓', place:'希伯仑',
+    desc:'亚伯拉罕从赫人以弗仑手中买下麦比拉洞与田地为埋葬撒拉之处。亚伯拉罕、以撒、雅各及其妻皆葬于此。',
+    scripture:'"要将我葬在赫人以弗仑田间的洞里，与我祖我父在一处。" —— 创世记 49:29' },
+  'ot-sinai': { name:'西奈山颁律法', place:'西奈山（何烈山）',
+    desc:'摩西到神那里，耶和华从山上呼唤他。神吩咐这一切的话说：我是耶和华你的神……（十诫）。',
+    scripture:'"我是耶和华你的神，曾将你从埃及地为奴之家领出来。" —— 出埃及记 20:2' },
+  'ot-redsea': { name:'过红海', place:'红海（芦苇海）',
+    desc:'摩西向海伸杖。耶和华便用大东风，使海水一夜退去，水便分开，海就成了干地，以色列人从海中走干地过去。',
+    scripture:'"耶和华必为你们争战，你们只管静默，不要作声。" —— 出埃及记 14:14' },
+  'ot-kadesh': { name:'加低斯巴尼亚——旷野漂流', place:'加低斯巴尼亚',
+    desc:'摩西从加低斯巴尼亚打发十二探子窥探迦南地。因不信，以色列人在巴兰旷野漂流四十年。',
+    scripture:'"这恶会众我忍耐他们要到几时呢？" —— 民数记 14:27' },
+  'ot-nebo': { name:'摩西卒于尼波山', place:'尼波山 · 摩押',
+    desc:'摩西从摩押平原登尼波山。耶和华把全地指给他看。摩西就死在那里，葬在摩押地的一个山谷中。',
+    scripture:'"我使你眼睛看见了，你却不得过到那里去。" —— 申命记 34:4' },
+  'ot-jordan': { name:'以色列过约旦河', place:'约旦河 · 耶利哥对面',
+    desc:'抬约柜的祭司脚一入水边，从上往下流的水便在极远之地立起成垒。百姓就在耶利哥的对面过去了。',
+    scripture:'"从今日起，我必使你在以色列众人眼前尊大。" —— 约书亚记 3:7' },
+  'ot-jerichofall': { name:'耶利哥城墙倒塌', place:'耶利哥',
+    desc:'以色列人围城七日。第七日，祭司吹角，百姓大声呼喊，城墙就塌陷了。',
+    scripture:'"呼喊吧，因为耶和华已经把城交给你们了！" —— 约书亚记 6:16' },
+  'ot-ai': { name:'艾城之败与胜', place:'艾城',
+    desc:'因亚干犯罪，以色列人初战艾城败北。悔改之后，约书亚以伏兵之计攻取了艾城。',
+    scripture:'"以色列人犯了罪。" —— 约书亚记 7:11' },
+  'ot-shiloh': { name:'示罗的会幕', place:'示罗',
+    desc:'以色列全会众都聚集在示罗，把会幕设立在那里。哈拿之子撒母耳在此事奉耶和华。',
+    scripture:'"我祈求为要得这孩子，耶和华已将我所求的赐给我了。" —— 撒母耳记上 1:27' },
+  'ot-gilboa': { name:'扫罗死于基利波山', place:'基利波山',
+    desc:'非利士人与以色列人在基利波山争战。扫罗与他三个儿子皆死于此。大卫哀歌：英雄何竟仆倒！',
+    scripture:'"不要在迦特报告，⋯以色列的尊荣在你的高处被杀！" —— 撒母耳记下 1:19–20' },
+  'ot-davidanointed': { name:'大卫被膏立为王', place:'伯利恒（受膏）/ 希伯仑（登基）',
+    desc:'撒母耳在伯利恒膏立大卫；后大卫在希伯仑被膏作以色列众人之王，在那里作王七年，然后攻取耶路撒冷。',
+    scripture:'"耶和华是看内心。" —— 撒母耳记上 16:7' },
+  'ot-elah': { name:'大卫战歌利亚', place:'以拉谷',
+    desc:'在以拉谷，牧羊少年大卫凭甩石机弦与一块石头，奉万军之耶和华的名，击杀非利士迦特巨人歌利亚。',
+    scripture:'"你是靠刀枪⋯⋯而来；我来攻击你，是靠万军之耶和华的名。" —— 撒母耳记上 17:45' },
+  'ot-davidcity': { name:'大卫攻取耶路撒冷', place:'大卫之城 · 耶路撒冷',
+    desc:'大卫攻取了锡安的保障——耶布斯人的山寨，住在其中，称为大卫之城。又将约柜运到耶路撒冷。',
+    scripture:'"大卫日见强盛，因为耶和华万军之神与他同在。" —— 撒母耳记下 5:10' },
+  'ot-temple': { name:'所罗门建圣殿', place:'摩利亚山 · 耶路撒冷',
+    desc:'所罗门就在耶路撒冷摩利亚山上动工，为耶和华建殿。建造七年完工，耶和华的荣光充满了殿宇。',
+    scripture:'"我已经建造殿宇作你的居所，为你永远的住处。" —— 列王纪上 8:13' },
+  'ot-carmel': { name:'以利亚在迦密山', place:'迦密山',
+    desc:'以利亚在迦密山上挑战巴力的众先知。耶和华降火烧尽燔祭，众民俯伏：耶和华是神！耶和华是神！',
+    scripture:'"你们心持两意要到几时呢？" —— 列王纪上 18:21' },
+  'ot-samaria': { name:'北国首都撒玛利亚', place:'撒玛利亚（撒巴斯特）',
+    desc:'暗利用二他连得银子向撒玛买了撒玛利亚山，在山上造城，称为撒玛利亚。北国以色列之京。',
+    scripture:'"用二他连得银子向撒玛买了撒玛利亚山。" —— 列王纪上 16:24' },
+  'ot-niniveh': { name:'约拿往尼尼微', place:'约帕（出航之港）',
+    desc:'约拿起来，逃往他施去躲避耶和华，下到约帕找着一只船要往他施去。大鱼将其送回；他后往尼尼微宣告。',
+    scripture:'"再等四十日，尼尼微必倾覆了！" —— 约拿书 3:4' },
+  'ot-fall': { name:'撒玛利亚陷落——以色列被掳', place:'撒玛利亚',
+    desc:'何细亚第九年，亚述王攻取了撒玛利亚，将以色列人掳到亚述——因为他们不听从耶和华他们神的话。',
+    scripture:'"他们不听从耶和华他们神的话。" —— 列王纪下 18:12' },
+  'ot-fallj': { name:'耶路撒冷陷落——巴比伦被掳', place:'耶路撒冷',
+    desc:'巴比伦王尼布甲尼撒焚烧耶和华的殿与王宫和耶路撒冷一切的房屋，又拆毁城墙。犹大被掳。',
+    scripture:'"先前满有人民的城，现在何竟独坐！" —— 耶利米哀歌 1:1' },
+  'ot-return': { name:'被掳归回——重建圣殿', place:'耶路撒冷',
+    desc:'波斯王古列下诏：耶和华天上的神已将天下万国赐给我，又嘱咐我在耶路撒冷为他建造殿宇。以斯拉重建圣殿，尼希米重建城墙。',
+    scripture:'"在你们中间凡作他子民的，可以上去。" —— 以斯拉记 1:3' },
+
+  /* ----- Acts / Paul ----- */
+  'paul-pentecost': { name:'五旬节——教会诞生', place:'楼上的房间 · 耶路撒冷',
+    desc:'五旬节到了，门徒都聚集在一处。忽然从天上有响声下来，好像一阵大风吹过，又有舌头如火焰显现出来，分开落在他们各人头上。',
+    scripture:'"他们就都被圣灵充满。" —— 使徒行传 2:4' },
+  'paul-stephen': { name:'司提反殉道', place:'耶路撒冷城外',
+    desc:'司提反被圣灵充满，定睛望天，看见神的荣耀。众人把他推到城外，用石头打他；扫罗也喜悦他被害。',
+    scripture:'"主啊，不要将这罪归于他们！" —— 使徒行传 7:60' },
+  'paul-philip': { name:'腓利与埃提阿伯太监', place:'往迦萨的路上',
+    desc:'有主的使者对腓利说：起来！向南走，往那从耶路撒冷下迦萨的路上去。腓利遇见一位读以赛亚书的太监，向他传讲耶稣，并为他施洗。',
+    scripture:'"看哪，这里有水，我受洗有什么妨碍呢？" —— 使徒行传 8:36' },
+  'paul-damascus': { name:'扫罗在大马士革路上归主', place:'大马士革路上',
+    desc:'扫罗将到大马士革，忽然从天上发光，四面照着他。他就仆倒在地，听见有声音说：扫罗，扫罗，你为什么逼迫我？',
+    scripture:'"我就是你所逼迫的耶稣。" —— 使徒行传 9:5' },
+  'paul-cornelius': { name:'彼得与哥尼流——福音及外邦', place:'凯撒利亚',
+    desc:'凯撒利亚的百夫长哥尼流打发人去请彼得。彼得还说话的时候，圣灵降在一切听道的人身上——外邦人也领受了圣灵。',
+    scripture:'"我真看出神是不偏待人。" —— 使徒行传 10:34' },
+  'paul-antioch': { name:'安提阿教会——门徒被称为基督徒', place:'安提阿（奥伦提斯河畔）',
+    desc:'许多人归服了主，巴拿巴去把扫罗带到安提阿，足有一年的工夫教训了许多人。门徒称为基督徒，是从安提阿起首。',
+    scripture:'"门徒称为基督徒，是从安提阿起首。" —— 使徒行传 11:26' },
+  'paul-peter-prison': { name:'彼得蒙释出狱', place:'耶路撒冷',
+    desc:'希律王下手苦害教会中几个人，用刀杀了雅各。又把彼得收在监里。教会却为他切切的祷告神，主的使者把彼得救了出来。',
+    scripture:'"我现在真知道主差遣他的使者。" —— 使徒行传 12:11' },
+  'paul-j1-start': { name:'第一次宣教旅程——自安提阿出发', place:'安提阿',
+    desc:'他们事奉主，禁食的时候，圣灵说：要为我分派巴拿巴和扫罗，去做我召他们所做的工。他们就坐船往居比路（塞浦路斯）去。',
+    scripture:'"要为我分派巴拿巴和扫罗，去做我召他们所做的工。" —— 使徒行传 13:2' },
+  'paul-cyprus': { name:'居比路——以吕马术士', place:'帕弗 · 居比路',
+    desc:'在帕弗遇见一个术士巴耶稣（以吕马）。扫罗（又名保罗）使他眼瞎了。方伯士求保罗就信了。',
+    scripture:'"你这充满诡诈的⋯⋯还不止住扭曲主的正道吗？" —— 使徒行传 13:10' },
+  'paul-galatia': { name:'加拉太——特庇 · 路司得 · 以哥念', place:'小亚细亚（图外西北）',
+    desc:'在路司得，保罗医好一个生来瘸腿的人，被尊为神，后又被人用石头打，以为已死。他活过来后，往特庇去，又回头按立长老。',
+    scripture:'"我们进入神的国，必须经历许多艰难。" —— 使徒行传 14:22' },
+  'paul-council': { name:'耶路撒冷会议', place:'耶路撒冷',
+    desc:'使徒和长老聚会商议，外邦信徒是否当受割礼。雅各发言定夺：不可难为那归服神的外邦人。',
+    scripture:'"圣灵和我们定意。" —— 使徒行传 15:28' },
+  'paul-macedonia': { name:'第二次旅程——马其顿的呼声', place:'特罗亚 → 腓立比',
+    desc:'夜间有异象现与保罗：有一个马其顿人站着求他说：请你过到马其顿来帮助我们！他们就断定是主召他们去。',
+    scripture:'"请你过到马其顿来帮助我们！" —— 使徒行传 16:9' },
+  'paul-philippi': { name:'腓立比——禁卒归主', place:'腓立比 · 马其顿（图外西北）',
+    desc:'保罗、西拉受了重伤，下在监里。半夜唱诗赞美神，地大震动；监门全开。禁卒大喊：我当怎样行才可以得救？',
+    scripture:'"当信主耶稣，你和你一家都必得救。" —— 使徒行传 16:31' },
+  'paul-areopagus': { name:'雅典——亚略巴古传讲', place:'雅典（图外西北）',
+    desc:'保罗站在亚略巴古当中：众位雅典人哪，我看你们凡事很敬畏鬼神。你们所不认识而敬拜的——我现在告诉你们，他就是那位未识之神。',
+    scripture:'"我们生活、动作、存留，都在乎他。" —— 使徒行传 17:28' },
+  'paul-corinth': { name:'哥林多——事奉一年半', place:'哥林多（图外西北）',
+    desc:'保罗在哥林多住了一年零六个月，将神的道教训他们。管会堂的基利司布和全家都信了主，许多哥林多人听了就相信受洗。',
+    scripture:'"不要怕⋯⋯有我与你同在⋯⋯在这城里我有许多的百姓。" —— 使徒行传 18:9–10' },
+  'paul-ephesus': { name:'以弗所——三年事奉，银匠暴乱', place:'以弗所（图外西北）',
+    desc:'保罗在推喇奴的学房教训人，有两年之久。银匠底米丢煽动暴乱：大哉以弗所人的亚底米！喊了约有两小时。',
+    scripture:'"叫一切住在亚西亚的⋯⋯都听见主的道。" —— 使徒行传 19:10' },
+  'paul-miletus': { name:'米利都话别', place:'米利都（图外西北）',
+    desc:'保罗从米利都打发人往以弗所去，请教会的长老来。他跪下同众人祷告，他们都痛哭，最伤心的，就是他说"以后不能再见我的面"。',
+    scripture:'"神的旨意，我并没有一样避讳不传给你们的。" —— 使徒行传 20:27' },
+  'paul-tyre': { name:'推罗与凯撒利亚的预言警告', place:'推罗 · 凯撒利亚',
+    desc:'在推罗，门徒被圣灵感动，告诉保罗不要上耶路撒冷去。在凯撒利亚，亚迦布拿保罗的腰带，预言他将被捆绑。保罗说：我已经预备好了，连死也愿意。',
+    scripture:'"愿主的旨意成就便了。" —— 使徒行传 21:14' },
+  'paul-arrest': { name:'保罗在圣殿被捕', place:'耶路撒冷',
+    desc:'从亚西亚来的犹太人在殿里煽动众人。他们捉住保罗，千夫长把他从乱民中救出，用两条铁链捆锁。',
+    scripture:'"除掉他！" —— 使徒行传 21:36' },
+  'paul-caesarea': { name:'在腓力斯、非斯都、亚基帕前受审', place:'凯撒利亚',
+    desc:'保罗被解到凯撒利亚，分别在腓力斯、非斯都、亚基帕王前受审。他述说自己蒙召之事，亚基帕说：你想稍微一劝，便叫我作基督徒啊！',
+    scripture:'"我要上告于凯撒。" —— 使徒行传 25:11' },
+  'paul-shipwreck': { name:'米利大岛海难', place:'马耳他岛（图外西方）',
+    desc:'前往罗马的途中，狂风名叫"友拉革罗"刮起，被吹了十四天。船破了，两百七十六人都得救上了岸，岛名叫米利大（即马耳他）。',
+    scripture:'"你们的性命，一个也不失丧，惟独失丧这船。" —— 使徒行传 27:22' },
+  'paul-rome': { name:'保罗到达罗马——带锁链传道', place:'罗马（图外西方）',
+    desc:'我们到了罗马，保罗蒙准和一个看守他的兵另住在一处。他在自己所租的房子里住了足足两年，凡来见他的人，他都接待，宣讲神的国。',
+    scripture:'"放胆传讲神国的道，将主耶稣基督的事教导人。" —— 使徒行传 28:31' },
+  // ---- Cycle 3 OT additions ----
+  'ot-sodom':       { name:'所多玛与蛾摩拉的毁灭', place:'死海平原',
+    desc:'耶和华将硫磺与火，从天上耶和华那里降与所多玛和蛾摩拉，把那些城和全平原、并城里所有的居民都毁灭了。罗得的妻子在后边回头一看，就变成了一根盐柱。',
+    scripture:'"逃命罢，不可回头看。" —— 创世记 19:17' },
+  'ot-jacobwell':   { name:'雅各井（在叙加）', place:'叙加（示剑附近）',
+    desc:'雅各从哈抹的子孙手中买了一块田，在那里筑了一座坛。他所挖的井闻名于世；几个世纪后，耶稣在这井旁与撒玛利亚妇人相遇。',
+    scripture:'"雅各……来到迦南地的示剑城。" —— 创世记 33:18' },
+  'ot-shilohh':     { name:'哈拿祈祷 · 撒母耳蒙召', place:'示罗',
+    desc:'哈拿心里愁苦，痛痛哭泣，祈祷耶和华。耶和华顾念她，她就生了一个儿子，给他起名叫撒母耳。这孩子在耶和华面前事奉；夜间耶和华呼唤他。',
+    scripture:'"耶和华啊，请说，仆人敬听。" —— 撒母耳记上 3:9' },
+  'ot-megiddo':     { name:'约西亚王战死于米吉多', place:'米吉多',
+    desc:'埃及王法老尼哥上来攻击亚述王；犹大王约西亚去抵挡他，弓箭手在米吉多射中约西亚王。他在那里被杀——米吉多预表了哈米吉多顿。',
+    scripture:'"犹大与耶路撒冷众人都为约西亚悲哀。" —— 历代志下 35:24' },
+  'ot-elijahsinai': { name:'以利亚在何烈山——微小的声音', place:'西奈山 · 何烈',
+    desc:'以利亚走了四十昼夜，到了何烈山。烈风、地震、烈火过去后，耶和华都不在其中；火后有微小的声音——以利亚一听见，就用外衣蒙上脸。',
+    scripture:'"以利亚啊，你在这里做甚么？" —— 列王纪上 19:13' },
+  'ot-naaman':      { name:'乃缦在约旦河得医治', place:'约旦河',
+    desc:'亚兰人乃缦是大麻疯患者，照着以利沙的话下到约旦河里沐浴七回；他的肉复原好像小孩子的肉，他就洁净了。',
+    scripture:'"如今我知道，除了以色列之外，普天下没有神。" —— 王下 5:15' },
+};
+
+const UI_TEXT = {
+  panelClose: { en:'×', zh:'×' },
+};
+
+let LANG = 'en';
+function txt(ev, key){
+  if (LANG === 'zh' && EVENTS_ZH[ev.id] && EVENTS_ZH[ev.id][key] != null){
+    return EVENTS_ZH[ev.id][key];
+  }
+  return ev[key];
+}
+
+/* ===================== CITIES & SEAS (annotation layers) ===================== */
+// Important biblical/geographic places shown as small dotted labels (not events)
+const CITIES = [
+  // — North —
+  { en:'Tyre',          zh:'推罗',     coord:[35.20, 33.27], kind:'city' },
+  { en:'Sidon',         zh:'西顿',     coord:[35.37, 33.55], kind:'city' },  // off-map north but ok
+  { en:'Caesarea Philippi', zh:'凯撒利亚腓立比', coord:[35.69, 33.25], kind:'city' },
+  { en:'Mt. Hermon',    zh:'黑门山',   coord:[35.85, 33.40], kind:'mountain' },
+  { en:'Dan',           zh:'但',       coord:[35.65, 33.25], kind:'city' },
+  { en:'Hazor',         zh:'夏琐',     coord:[35.57, 33.02], kind:'city' },
+  // — Galilee —
+  { en:'Capernaum',     zh:'迦百农',   coord:[35.575, 32.881], kind:'city' },
+  { en:'Bethsaida',     zh:'伯赛大',   coord:[35.63, 32.91],  kind:'city' },
+  { en:'Tiberias',      zh:'提比哩亚', coord:[35.53, 32.79],  kind:'city' },
+  { en:'Magdala',       zh:'抹大拉',   coord:[35.51, 32.83],  kind:'city' },
+  { en:'Cana',          zh:'迦拿',     coord:[35.339, 32.748], kind:'city' },
+  { en:'Nazareth',      zh:'拿撒勒',   coord:[35.30, 32.70],  kind:'city' },
+  { en:'Mt. Tabor',     zh:'他泊山',   coord:[35.39, 32.687], kind:'mountain' },
+  { en:'Nain',          zh:'拿因',     coord:[35.34, 32.63],  kind:'city' },
+  { en:'Mt. Carmel',    zh:'迦密山',   coord:[35.05, 32.72],  kind:'mountain' },
+  { en:'Megiddo',       zh:'米吉多',   coord:[35.18, 32.58],  kind:'city' },
+  // — Mediterranean coast —
+  { en:'Caesarea',      zh:'凯撒利亚', coord:[34.89, 32.50],  kind:'city' },
+  { en:'Joppa',         zh:'约帕',     coord:[34.75, 32.05],  kind:'city' },
+  { en:'Lydda',         zh:'吕大',     coord:[34.89, 31.95],  kind:'city' },
+  { en:'Emmaus',        zh:'以马忤斯', coord:[35.00, 31.84],  kind:'city' },
+  { en:'Ashdod',        zh:'亚实突',   coord:[34.65, 31.80],  kind:'city' },
+  { en:'Ashkelon',      zh:'亚实基伦', coord:[34.57, 31.67],  kind:'city' },
+  { en:'Gaza',          zh:'迦萨',     coord:[34.47, 31.50],  kind:'city' },
+  // — Samaria —
+  { en:'Sebaste / Samaria', zh:'撒玛利亚', coord:[35.19, 32.28], kind:'city' },
+  { en:'Sychar',        zh:'叙加',     coord:[35.282, 32.210], kind:'city' },
+  { en:'Mt. Gerizim',   zh:'基利心山', coord:[35.27, 32.20],  kind:'mountain' },
+  // — Judea —
+  { en:'Jerusalem',     zh:'耶路撒冷', coord:[35.235, 31.778], kind:'capital' },
+  { en:'Bethlehem',     zh:'伯利恒',   coord:[35.20, 31.70],  kind:'capital' },
+  { en:'Bethany',       zh:'伯大尼',   coord:[35.262, 31.772], kind:'city' },
+  { en:'Mt. of Olives', zh:'橄榄山',   coord:[35.245, 31.778], kind:'mountain' },
+  { en:'Hebron',        zh:'希伯仑',   coord:[35.10, 31.53],  kind:'city' },
+  { en:'Jericho',       zh:'耶利哥',   coord:[35.444, 31.857], kind:'city' },
+  { en:'Qumran',        zh:'昆兰',     coord:[35.46, 31.74],  kind:'city' },
+  { en:'Masada',        zh:'马萨大',   coord:[35.35, 31.32],  kind:'city' },
+  // — Trans-Jordan —
+  { en:'Bethany-beyond-Jordan', zh:'约旦河外伯大尼', coord:[35.55, 31.84], kind:'city' },
+  { en:'Pella',         zh:'比拉',     coord:[35.62, 32.45],  kind:'city' },
+  { en:'Gerasa',        zh:'格拉森',   coord:[35.90, 32.27],  kind:'city' },
+  { en:'Philadelphia (Amman)', zh:'费拉德尔菲亚', coord:[35.93, 31.95], kind:'city' },
+  { en:'Madaba',        zh:'米底巴',   coord:[35.79, 31.72],  kind:'city' },
+  // — Negev —
+  { en:'Beersheba',     zh:'别是巴',   coord:[34.80, 31.25],  kind:'city' },
+  { en:'Eilat / Elath', zh:'以拉他',   coord:[34.95, 29.55],  kind:'city' },
+  { en:'Petra',         zh:'佩特拉',   coord:[35.45, 30.32],  kind:'city' },
+  // ---- Added in cycle 3: more biblical sites ----
+  { en:'Megiddo (Armageddon)', zh:'米吉多 · 哈米吉多顿', coord:[35.18, 32.59], kind:'city' },
+  { en:'Caesarea Philippi',    zh:'凯撒利亚腓立比',     coord:[35.69, 33.25], kind:'city' },
+  { en:'Beth Shean',           zh:'伯善',               coord:[35.50, 32.50], kind:'city' },
+  { en:'Sodom (traditional)',  zh:'所多玛 · 蛾摩拉',    coord:[35.40, 31.10], kind:'city' },
+  { en:"Joseph's Tomb",        zh:'约瑟坟墓',           coord:[35.28, 32.21], kind:'city' },
+  { en:'Lachish',              zh:'拉吉',               coord:[34.85, 31.57], kind:'city' },
+  { en:'Bethsaida',            zh:'伯赛大',             coord:[35.63, 32.91], kind:'city' },
+  { en:'Magdala',              zh:'抹大拉',             coord:[35.51, 32.83], kind:'city' },
+  { en:'Chorazin',             zh:'哥拉汛',             coord:[35.56, 32.91], kind:'city' },
+  { en:'Emmaus',               zh:'以马忤斯',           coord:[35.00, 31.84], kind:'city' },
+  { en:'Bethphage',            zh:'伯法其',             coord:[35.245, 31.78], kind:'city' },
+  { en:'Mount Ebal',           zh:'以巴路山',           coord:[35.27, 32.23], kind:'mountain' },
+  { en:'Mount Gilboa',         zh:'基利波山',           coord:[35.42, 32.50], kind:'mountain' },
+  { en:'Mount Nebo',           zh:'尼波山',             coord:[35.725, 31.768], kind:'mountain' },
+  { en:'Mount Sinai',          zh:'西奈山 · 何烈',      coord:[33.97, 29.55], kind:'mountain' },
+  { en:'Mount Meron',          zh:'米仑山',             coord:[35.40, 33.00], kind:'mountain' },
+];
+
+// The four seas (water-body labels — large, italic blue typography)
+const SEAS = [
+  { en:'Mediterranean Sea', zh:'地 中 海',     coord:[34.30, 32.50], rot: -25 },
+  { en:'Sea of Galilee',    zh:'加利利海',     coord:[35.59, 32.83], rot: 0  },
+  { en:'Dead Sea',          zh:'死  海',       coord:[35.48, 31.40], rot: 75 },
+  { en:'Red Sea (Gulf of Aqaba)', zh:'红海（亚喀巴湾）', coord:[34.97, 29.65], rot: -10 },
+];
+
+/* ===================== MAP EXTENT ===================== */
+// Holy Land window: from Sinai/Negev in the south to Galilee/Lebanon foothills in the north
+const LNG_MIN = 33.8, LNG_MAX = 36.7;
+const LAT_MIN = 29.30, LAT_MAX = 33.60;
+const LNG_CENTER = (LNG_MIN + LNG_MAX) / 2;
+const LAT_CENTER = (LAT_MIN + LAT_MAX) / 2;
+const LNG_SPAN = LNG_MAX - LNG_MIN;
+const LAT_SPAN = LAT_MAX - LAT_MIN;
+// World units: 1 unit ~= 1° at center, but x scaled by cos(lat) for aspect
+const SCALE_Y = 12.0;
+const SCALE_X = SCALE_Y * Math.cos(LAT_CENTER * Math.PI/180);
+const MAP_W = LNG_SPAN * SCALE_X;
+const MAP_H = LAT_SPAN * SCALE_Y;
+
+/* ===================== TERRAIN ===================== */
+// Each "peak" (positive) or "basin" (negative) is a Gaussian bump.
+// h = elevation in meters (real-world) ; r = radius in degrees ; falloff = sharpness
+const TERRAIN = {
+  peaks: [
+    // All heights are REAL elevations in meters (vertical exaggeration is
+    // applied uniformly via VERTICAL_EXAGGERATION).
+    // Falloff is moderate (1.0–1.5) so peaks don't bleed wildly into rift valleys.
+    //
+    // ---- Mt. Hermon (snow-capped, NE corner of map, real peak 2,814 m) ----
+    { lng:35.86, lat:33.42, r:0.18, h:2814, falloff:1.0 },
+    { lng:35.80, lat:33.35, r:0.22, h:2200, falloff:1.2 },
+    // ---- Galilee / Upper Galilee ----
+    { lng:35.40, lat:33.05, r:0.20, h:1208, falloff:1.0 },   // Mt. Meron (1,208 m IRL)
+    { lng:35.30, lat:32.90, r:0.25, h:600,  falloff:1.2 },   // Lower Galilee hills
+    { lng:35.40, lat:32.70, r:0.10, h:575,  falloff:0.8 },   // Mt. Tabor (sharp cone)
+    { lng:35.30, lat:32.70, r:0.15, h:480,  falloff:1.2 },   // Nazareth ridge
+    // ---- Carmel ridge ----
+    { lng:35.05, lat:32.70, r:0.18, h:546,  falloff:1.1 },   // Mt. Carmel (546 m IRL)
+    // ---- Samarian highlands ----
+    { lng:35.25, lat:32.20, r:0.22, h:881,  falloff:1.1 },   // Mt. Gerizim (881 m IRL)
+    { lng:35.20, lat:32.05, r:0.18, h:780,  falloff:1.2 },
+    // ---- Judean mountains ----
+    { lng:35.22, lat:31.80, r:0.18, h:830,  falloff:1.1 },   // Jerusalem ridge (~830 m IRL)
+    { lng:35.20, lat:31.70, r:0.15, h:780,  falloff:1.1 },   // Bethlehem (~775 m IRL)
+    { lng:35.10, lat:31.55, r:0.18, h:1020, falloff:1.1 },   // Hebron heights (~1020 m IRL)
+    // ---- Trans-Jordan plateau ----
+    { lng:35.85, lat:32.50, r:0.30, h:1000, falloff:1.3 },
+    { lng:35.75, lat:31.90, r:0.25, h:950,  falloff:1.3 },
+    { lng:35.72, lat:31.77, r:0.10, h:817,  falloff:1.0 },   // Mt. Nebo (817 m IRL)
+    { lng:35.70, lat:31.20, r:0.30, h:1200, falloff:1.3 },   // Moabite plateau
+    { lng:35.55, lat:30.65, r:0.25, h:1300, falloff:1.3 },   // Edomite plateau (Petra ~1100 m)
+    // ---- Negev highlands ----
+    { lng:34.80, lat:30.60, r:0.40, h:800,  falloff:1.4 },
+    { lng:34.95, lat:30.55, r:0.20, h:1037, falloff:1.2 },   // Mt. Ramon (1037 m IRL)
+    // ---- Sinai edge ----
+    { lng:34.20, lat:30.40, r:0.35, h:700,  falloff:1.4 },
+    { lng:33.97, lat:29.55, r:0.18, h:2285, falloff:1.0 },   // Jebel Musa / Mt. Sinai (2,285 m IRL)
+  ],
+  basins: [
+    // ---------------- The Jordan Rift Valley ----------------
+    // Strategy: each basin is REALISTIC depth but with a SHARP, TIGHT
+    // Gaussian (small r, high falloff) so it does NOT bleed sideways
+    // into Jerusalem / Galilee / Moab plateaus.
+    //
+    // exp(-d²/r² · falloff) → at d=2r the value is exp(-4·falloff)
+    //   falloff=4 → bleed at 2r = exp(-16) ≈ 1e-7 (essentially zero)
+    //
+    // ---- Sea of Galilee (-210 m IRL) ----
+    { lng:35.58, lat:32.83, r:0.10, h:-260, falloff:3.0 },
+    // ---- Jordan Rift floor between Sea of Galilee and Dead Sea ----
+    // (narrow strip of basins along the river, never wider than ~0.10°)
+    { lng:35.575,lat:32.70, r:0.07, h:-220, falloff:3.5 },
+    { lng:35.560,lat:32.55, r:0.07, h:-240, falloff:3.5 },
+    { lng:35.555,lat:32.40, r:0.07, h:-260, falloff:3.5 },
+    { lng:35.550,lat:32.25, r:0.07, h:-300, falloff:3.5 },
+    { lng:35.545,lat:32.10, r:0.07, h:-340, falloff:3.5 },
+    { lng:35.540,lat:31.95, r:0.07, h:-380, falloff:3.5 },
+    { lng:35.530,lat:31.82, r:0.07, h:-410, falloff:3.5 },
+    // ---- Dead Sea (-430 m IRL) ----
+    // Two tight blobs covering the lake (~25 km long N–S, ~15 km wide).
+    // r=0.10° ≈ 11 km, falloff=3.0 → at d=0.30° (Jerusalem) bleed ≈ -430·exp(-27) ≈ 0 m ✔
+    { lng:35.48, lat:31.55, r:0.10, h:-430, falloff:3.0 },
+    { lng:35.46, lat:31.40, r:0.10, h:-430, falloff:3.0 },
+    { lng:35.44, lat:31.27, r:0.10, h:-430, falloff:3.0 },
+    // ---- Arabah (Wadi Araba) south of Dead Sea — gentle dip back to sea level ----
+    { lng:35.30, lat:30.95, r:0.10, h:-150, falloff:3.0 },
+    { lng:35.18, lat:30.65, r:0.10, h: -80, falloff:3.0 },
+    { lng:35.05, lat:30.30, r:0.10, h: -30, falloff:3.0 },
+    // ---- Gulf of Aqaba (sea) — long narrow inlet from Red Sea ----
+    // Real gulf is ~24 km wide × 175 km long, NE-SW orientation.
+    // We use a chain of moderately-sized basins along the gulf axis,
+    // depths ~800m IRL but kept modest in our exaggerated world so the
+    // sea-floor sits a reasonable distance below sea level (not a trench).
+    { lng:34.97, lat:30.05, r:0.10, h:-150, falloff:3.0 },   // northern tip (Eilat / Aqaba)
+    { lng:34.96, lat:29.85, r:0.12, h:-300, falloff:3.0 },
+    { lng:34.94, lat:29.65, r:0.12, h:-450, falloff:3.0 },
+    { lng:34.92, lat:29.45, r:0.12, h:-500, falloff:3.0 },
+    { lng:34.90, lat:29.30, r:0.12, h:-500, falloff:3.0 },
+  ]
+};
+
+const KM_PER_DEG = 111;
+const VERTICAL_EXAGGERATION = 14;
+const ELEV_K = (1 / (KM_PER_DEG * 1000)) * VERTICAL_EXAGGERATION * SCALE_Y;
+// e.g. 1000m * ELEV_K ≈ 0.30 world units (visible)
+
+/* Coastline / land mask: a polyline approximation of the Mediterranean shore +
+   the boundary of the small map window. Inside this polygon = land. */
+const COASTLINE = [
+  // Mediterranean coast (north -> south), simplified
+  [35.10, 33.10],
+  [35.05, 32.95],
+  [34.95, 32.83],
+  [34.85, 32.70],
+  [34.78, 32.55],
+  [34.65, 32.30],
+  [34.58, 32.10],
+  [34.55, 31.90],
+  [34.48, 31.70],
+  [34.40, 31.50],
+  [34.30, 31.30],
+  [34.25, 31.20],
+  [34.20, 31.10],
+  // Bottom-left corner of the map (Sinai / Egypt overland coast going SOUTH).
+  // We do NOT cut a notch for the Gulf of Aqaba here — the Gulf is its own
+  // hole in the land mask (see AQABA polygon).  This way the gulf appears
+  // as a long sea inlet sliced into the southern Sinai land mass, not as a
+  // trough cut into the bottom edge of the map.
+  [34.10, 30.90],
+  [34.00, 30.60],
+  [33.95, 30.20],
+  [33.90, 29.80],
+  [33.85, 29.40],
+  [33.80, 29.20],
+  [33.80, 29.15],     // off-map: extend slightly below to keep the south shore solid
+  // sweep across the south (off-map Sinai/Red-Sea coast) to the Arabian side
+  [34.30, 29.15],
+  [34.84, 29.15],     // approach west bank of Aqaba (will be cut by AQABA hole)
+  [35.12, 29.15],     // east bank of Aqaba
+  [35.30, 29.15],
+  [35.40, 29.20],
+  [35.45, 29.55],
+  [35.45, 29.95],
+  [35.42, 30.30],
+  [35.80, 30.80],
+  [36.20, 31.30],
+  [36.60, 31.80],
+  [36.65, 32.30],
+  [36.60, 32.80],
+  [36.40, 33.20],
+  [36.10, 33.45],
+  // back across the north
+  [35.70, 33.45],
+  [35.40, 33.30],
+  [35.20, 33.20],
+  [35.10, 33.10]
+];
+
+/* Gulf of Aqaba — narrow sea inlet from the Red Sea, between Sinai (W) and
+   Arabia (E).  Drawn as a tapering hourglass that is wider at the south
+   (continuous with the open Red Sea) and narrows to its true ~5 km width
+   at the northern tip near Eilat / Aqaba.  Extending past the map's south
+   edge (lat=29.20) prevents a "trough cut into the bottom edge" look. */
+const AQABA = [
+  // West shore (Sinai side), south to north
+  [34.84, 29.20],
+  [34.86, 29.30],
+  [34.88, 29.45],
+  [34.90, 29.65],
+  [34.92, 29.85],
+  [34.94, 30.05],
+  [34.96, 30.18],     // northern tip narrows in
+  // Northern tip (the head of the gulf, ~5 km wide IRL)
+  [35.00, 30.20],
+  // East shore (Arabian side), north to south
+  [35.04, 30.05],
+  [35.04, 29.85],
+  [35.06, 29.65],
+  [35.08, 29.45],
+  [35.10, 29.30],
+  [35.12, 29.20],
+  // close polygon (off-map southern boundary, well below lat=29.30)
+  [34.84, 29.20]
+];
+
+/* ===================== SCENE ===================== */
+const canvas = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.setClearColor(0x0c0a08, 1);
+
+const scene = new THREE.Scene();
+// Atmospheric fog gives subtle depth — distant Trans-Jordan plateaus fade to warm haze.
+scene.fog = new THREE.Fog(0x1a140c, 75, 230);
+
+const camera = new THREE.PerspectiveCamera(40, innerWidth/innerHeight, 0.1, 600);
+camera.position.set(0, 32, 28);
+
+const controls = new THREE.OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 14;
+controls.maxDistance = 110;
+controls.minPolarAngle = Math.PI * 0.05;
+controls.maxPolarAngle = Math.PI * 0.48;
+controls.target.set(0, 0.8, 0);
+
+/* lights — warm desert sunlight */
+scene.add(new THREE.AmbientLight(0xfff0d8, 0.45));
+const sun = new THREE.DirectionalLight(0xfff0c8, 1.45);
+sun.position.set(-30, 35, 12);
+scene.add(sun);
+const fill = new THREE.DirectionalLight(0xa0b8d0, 0.40);
+fill.position.set(25, 18, -20);
+scene.add(fill);
+const sky = new THREE.HemisphereLight(0xf0deb0, 0x3a2810, 0.30);
+scene.add(sky);
+
+/* projection — lng,lat -> world (Y is added later from height field) */
+let HEIGHT_FIELD = null;
+function project3D(lng, lat, h=0){
+  const ground = HEIGHT_FIELD ? HEIGHT_FIELD.sample(lng, lat) : 0;
+  return new THREE.Vector3(
+    (lng - LNG_CENTER) * SCALE_X,
+    ground + h,
+    -(lat - LAT_CENTER) * SCALE_Y
+  );
+}
+
+/* noise (fbm) — for ridge detail */
+function _hashI(x, y){
+  let n = (x | 0) * 374761393 + (y | 0) * 668265263;
+  n = (n ^ (n >>> 13)) >>> 0;
+  n = (n * 1274126177) >>> 0;
+  return ((n ^ (n >>> 16)) >>> 0) / 4294967295;
+}
+const _hash = (x, y) => _hashI(Math.floor(x * 1000), Math.floor(y * 1000));
+function _vnoise2(x, y){
+  const xi = Math.floor(x), yi = Math.floor(y);
+  const xf = x - xi,        yf = y - yi;
+  const u = xf*xf*(3 - 2*xf), v = yf*yf*(3 - 2*yf);
+  const a = _hashI(xi,   yi  );
+  const b = _hashI(xi+1, yi  );
+  const c = _hashI(xi,   yi+1);
+  const d = _hashI(xi+1, yi+1);
+  return (a*(1-u) + b*u)*(1-v) + (c*(1-u) + d*u)*v;
+}
+function fbm(x, y, oct=5, lac=2.0, gain=0.5){
+  let amp = 1, freq = 1, sum = 0, norm = 0;
+  for (let i=0;i<oct;i++){
+    sum  += amp * (_vnoise2(x*freq, y*freq)*2 - 1);
+    norm += amp;
+    amp  *= gain;
+    freq *= lac;
+  }
+  return sum / norm;
+}
+
+/* point-in-polygon (ray casting) */
+function pointInPoly(lng, lat, poly){
+  let inside = false;
+  for (let i=0, j=poly.length-1; i<poly.length; j=i++){
+    const xi=poly[i][0], yi=poly[i][1];
+    const xj=poly[j][0], yj=poly[j][1];
+    const intersect = ((yi>lat) !== (yj>lat))
+      && (lng < (xj-xi)*(lat-yi)/(yj-yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+/* ===================== HEIGHT FIELD ===================== */
+function buildHeightField(){
+  // Rasterize land mask
+  const W = 900, H = Math.round(W * (LAT_SPAN/LNG_SPAN));
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#000'; ctx.fillRect(0,0,W,H);
+  // draw land polygon (everything inside COASTLINE = land)
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  COASTLINE.forEach(([lng,lat], i) => {
+    const x = (lng - LNG_MIN)/LNG_SPAN * W;
+    const y = (LAT_MAX - lat)/LAT_SPAN * H;
+    if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.closePath(); ctx.fill();
+  // cut out Gulf of Aqaba (sea)
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.beginPath();
+  AQABA.forEach(([lng,lat], i) => {
+    const x = (lng - LNG_MIN)/LNG_SPAN * W;
+    const y = (LAT_MAX - lat)/LAT_SPAN * H;
+    if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.closePath(); ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
+
+  const data = ctx.getImageData(0,0,W,H).data;
+  const mask = new Uint8Array(W*H);
+  for (let i=0,j=0; i<data.length; i+=4, j++){
+    mask[j] = data[i] > 128 ? 1 : 0;
+  }
+  // soft edge
+  const soft = new Float32Array(W*H);
+  for (let i=0;i<mask.length;i++) soft[i] = mask[i];
+  function blur(src, dst){
+    for (let y=1;y<H-1;y++){
+      for (let x=1;x<W-1;x++){
+        const i = y*W+x;
+        dst[i] = (src[i] + src[i-1] + src[i+1] + src[i-W] + src[i+W]) * 0.2;
+      }
+    }
+  }
+  const tmp = new Float32Array(W*H);
+  for (let p=0;p<2;p++){ blur(soft, tmp); soft.set(tmp); }
+
+  function inLand(lng, lat){
+    const x = ((lng - LNG_MIN)/LNG_SPAN * W) | 0;
+    const y = ((LAT_MAX - lat)/LAT_SPAN * H) | 0;
+    if (x<0||x>=W||y<0||y>=H) return 0;
+    return mask[y*W + x];
+  }
+  function edgeSoft(lng, lat){
+    const x = ((lng - LNG_MIN)/LNG_SPAN * W) | 0;
+    const y = ((LAT_MAX - lat)/LAT_SPAN * H) | 0;
+    if (x<0||x>=W||y<0||y>=H) return 0;
+    return soft[y*W + x];
+  }
+
+  function elevation(lng, lat){
+    let e = 0;
+    for (const p of TERRAIN.peaks){
+      const dx = (lng - p.lng), dy = (lat - p.lat);
+      const d2 = (dx*dx + dy*dy) / (p.r*p.r);
+      e += p.h * Math.exp(-d2 * p.falloff);
+    }
+    for (const b of TERRAIN.basins){
+      const dx = (lng - b.lng), dy = (lat - b.lat);
+      const d2 = (dx*dx + dy*dy) / (b.r*b.r);
+      e += b.h * Math.exp(-d2 * b.falloff);
+    }
+    // ridge / detail — keep amplitude SMALL so it can't push a -200 m
+    // basin point above sea level, and can't artificially spike a 800 m
+    // ridge to 1500 m.
+    if (e > 50){
+      const ridge = 1 - Math.abs(fbm(lng*1.6, lat*1.6, 5));
+      const detail = fbm(lng*4.0, lat*4.0, 4);
+      const amp = Math.min(80, e * 0.10);     // reduced (was 220 / 0.30)
+      e += (ridge - 0.5) * 2 * amp + detail * Math.min(40, e*0.05);
+    } else if (e > -120) {
+      e += fbm(lng*3.0, lat*3.0, 4) * 12;     // gentle plain micro-relief
+    }
+    return e;
+  }
+
+  function sample(lng, lat){
+    const e = elevation(lng, lat);
+    const fade = edgeSoft(lng, lat);
+    if (fade < 0.05) return -0.30;     // open sea — matches sea-floor clamp
+    return e * ELEV_K * fade;
+  }
+
+  return { sample, elevation, edgeSoft, inLand, mask, W, H };
+}
+
+/* ===================== SATELLITE-IMAGERY-INSPIRED COLOR ===================== */
+// Color is determined by geographic region (matching real Landsat/Sentinel imagery
+// of Israel/Palestine/Sinai/Trans-Jordan), NOT by elevation.
+// Each region is a Gaussian "color stamp": colors blend smoothly via inverse-distance
+// weighting in (lng,lat) space.
+//
+// Reference satellite tones (NASA / ESA Sentinel-2 true-colour):
+//   Mediterranean coastal plain (Sharon)  : pale tan-yellow farmland
+//   Galilee hills (north)                 : olive-green Mediterranean scrub
+//   Carmel ridge                          : darker forest green
+//   Hula valley / upper Jordan            : bright green agriculture
+//   Samarian highlands                    : tan-brown limestone with green patches
+//   Judean mountains (Jerusalem ridge)    : pale grey-tan limestone
+//   Judean desert (east of Jerusalem)     : pale ochre to red-brown bare rock
+//   Negev highlands                       : reddish-tan desert
+//   Negev / Arava deep south              : pinkish red-brown sand & gravel
+//   Sinai (north-east)                    : warm yellow-brown sand
+//   Trans-Jordan plateau (east)           : tan with patches of green
+//   Moab plateau                          : red-brown
+//   Jordan rift valley floor              : khaki-green farms with bare patches
+const REGION_COLORS = [
+  // [lng, lat, radius_deg, [r,g,b], weight]
+  // — Mediterranean coastal plain (Sharon, Philistia) —
+  [34.78, 32.30, 0.45, [0.86, 0.81, 0.58], 1.2],
+  [34.65, 31.70, 0.40, [0.88, 0.82, 0.58], 1.2],
+  [34.55, 31.30, 0.35, [0.90, 0.83, 0.60], 1.0],
+  // — Carmel forest (darker green) —
+  [35.05, 32.72, 0.20, [0.42, 0.50, 0.28], 1.4],
+  // — Galilee hills (olive Mediterranean scrub) —
+  [35.30, 32.85, 0.30, [0.55, 0.60, 0.34], 1.1],
+  [35.50, 32.95, 0.30, [0.50, 0.58, 0.32], 1.1],
+  [35.40, 33.10, 0.30, [0.48, 0.55, 0.30], 1.1],
+  // — Mt. Hermon (snow / pale rock) —
+  [35.55, 33.30, 0.25, [0.84, 0.84, 0.82], 1.2],
+  // — Hula valley & Sea of Galilee shore (irrigated green) —
+  [35.60, 33.10, 0.18, [0.42, 0.55, 0.30], 1.1],
+  [35.55, 32.75, 0.18, [0.55, 0.60, 0.36], 0.9],
+  // — Jezreel plain (greener farmland) —
+  [35.30, 32.55, 0.25, [0.62, 0.62, 0.40], 1.0],
+  // — Samarian highlands (tan limestone) —
+  [35.25, 32.20, 0.35, [0.74, 0.66, 0.45], 1.0],
+  [35.15, 32.10, 0.30, [0.76, 0.68, 0.45], 1.0],
+  // — Judean mountains (Jerusalem / Bethlehem / Hebron — pale tan grey limestone) —
+  [35.22, 31.78, 0.25, [0.78, 0.72, 0.55], 1.2],
+  [35.20, 31.70, 0.22, [0.80, 0.74, 0.56], 1.2],
+  [35.10, 31.55, 0.30, [0.76, 0.70, 0.52], 1.1],
+  // — Judean wilderness (east of Jerusalem to Dead Sea — pale ochre bare rock) —
+  [35.40, 31.80, 0.30, [0.82, 0.66, 0.42], 1.2],
+  [35.40, 31.60, 0.30, [0.84, 0.66, 0.42], 1.2],
+  [35.35, 31.45, 0.25, [0.86, 0.66, 0.40], 1.1],
+  // — Jordan rift floor (khaki-green farms, bare patches) —
+  [35.52, 32.30, 0.18, [0.72, 0.66, 0.42], 1.0],
+  [35.52, 32.00, 0.18, [0.72, 0.64, 0.40], 1.0],
+  [35.50, 31.65, 0.18, [0.74, 0.62, 0.38], 1.0],
+  // — Northern Negev (yellow-tan) —
+  [34.80, 31.20, 0.35, [0.84, 0.74, 0.50], 1.1],
+  [34.65, 31.10, 0.35, [0.86, 0.74, 0.50], 1.1],
+  // — Central Negev (Ramon, ochre red-brown) —
+  [34.85, 30.60, 0.35, [0.78, 0.58, 0.40], 1.2],
+  [34.95, 30.40, 0.30, [0.74, 0.54, 0.38], 1.2],
+  // — Arava / deep south (pinkish red sand & gravel) —
+  [35.10, 30.30, 0.25, [0.82, 0.60, 0.45], 1.1],
+  [35.00, 29.80, 0.25, [0.84, 0.62, 0.46], 1.1],
+  // — Sinai (north-east, warm sand-yellow) —
+  [34.20, 30.40, 0.40, [0.86, 0.72, 0.46], 1.2],
+  [34.05, 30.70, 0.40, [0.84, 0.72, 0.46], 1.1],
+  [34.30, 30.10, 0.30, [0.82, 0.66, 0.44], 1.1],
+  // — Trans-Jordan plateau (Gilead, Bashan — tan with green patches) —
+  [35.85, 32.50, 0.40, [0.68, 0.62, 0.40], 1.1],
+  [36.10, 32.90, 0.40, [0.62, 0.60, 0.38], 1.0],
+  [36.20, 32.30, 0.40, [0.70, 0.60, 0.40], 1.0],
+  // — Moab plateau (red-brown east of Dead Sea) —
+  [35.80, 31.60, 0.30, [0.74, 0.56, 0.38], 1.2],
+  [35.80, 31.20, 0.35, [0.72, 0.52, 0.34], 1.3],
+  // — Edom (south-east, red sandstone) —
+  [35.55, 30.60, 0.40, [0.74, 0.50, 0.34], 1.2],
+  [35.60, 30.20, 0.40, [0.76, 0.50, 0.34], 1.2],
+];
+
+const _bcolor = new THREE.Color();
+function biomeColor(lng, lat, elevM, fade){
+  // Water bodies — overrides land color
+  // Mediterranean / open sea
+  if (fade < 0.05){
+    // deeper blue
+    return _bcolor.setRGB(0.10, 0.22, 0.42);
+  }
+  // Dead Sea (real satellite: turquoise-green from minerals)
+  if (lng > 35.30 && lng < 35.60 && lat > 31.05 && lat < 31.65 && elevM < -100){
+    return _bcolor.setRGB(0.32, 0.55, 0.55);
+  }
+  // Sea of Galilee (deep blue, slightly green)
+  if (lng > 35.45 && lng < 35.70 && lat > 32.70 && lat < 32.95 && elevM < -50){
+    return _bcolor.setRGB(0.18, 0.38, 0.55);
+  }
+  // Gulf of Aqaba / Red Sea (very deep blue)
+  // Updated lng range to 35.14 to match the new wider AQABA polygon east shore.
+  if (lat < 30.25 && lng > 34.84 && lng < 35.14){
+    return _bcolor.setRGB(0.08, 0.28, 0.50);
+  }
+
+  // Land: inverse-distance weighted blend of REGION_COLORS
+  let R=0, G=0, B=0, W=0;
+  for (const [clng, clat, r, col, w] of REGION_COLORS){
+    const dx = (lng - clng), dy = (lat - clat);
+    const d2 = (dx*dx + dy*dy) / (r*r);
+    const wt = w * Math.exp(-d2 * 1.0);
+    R += col[0] * wt; G += col[1] * wt; B += col[2] * wt; W += wt;
+  }
+  if (W > 0){ R/=W; G/=W; B/=W; }
+  else { R=0.78; G=0.70; B=0.50; }
+
+  // fBm noise for satellite-like microtexture (broken patches of vegetation/rock)
+  const n = fbm(lng*4.0, lat*4.0, 4);
+  R = clamp(R + n*0.06, 0, 1);
+  G = clamp(G + n*0.05, 0, 1);
+  B = clamp(B + n*0.04, 0, 1);
+
+  // Snow on Mt Hermon (only above ~1400m AND in upper north)
+  if (elevM > 1400 && lat > 33.15){
+    const sn = clamp((elevM-1400)/300, 0, 1);
+    R = R*(1-sn) + 0.96*sn;
+    G = G*(1-sn) + 0.96*sn;
+    B = B*(1-sn) + 0.98*sn;
+  }
+
+  return _bcolor.setRGB(R, G, B);
+}
+
+/* ===================== BUILD MAP ===================== */
+let mapMesh;
+function buildMap(){
+  HEIGHT_FIELD = buildHeightField();
+  const SEG_X = 480, SEG_Y = Math.round(480 * (LAT_SPAN/LNG_SPAN) * (SCALE_Y/SCALE_X));
+  const geo = new THREE.PlaneGeometry(MAP_W, MAP_H, SEG_X, SEG_Y);
+  geo.rotateX(-Math.PI/2);
+
+  const pos = geo.attributes.position;
+  const colors = new Float32Array(pos.count * 3);
+  for (let i=0; i<pos.count; i++){
+    const wx = pos.getX(i);
+    const wz = pos.getZ(i);
+    const lng = wx / SCALE_X + LNG_CENTER;
+    const lat = -wz / SCALE_Y + LAT_CENTER;
+    const fade = HEIGHT_FIELD.edgeSoft(lng, lat);
+    const elev = HEIGHT_FIELD.elevation(lng, lat);
+    let y = elev * ELEV_K * fade;
+    if (fade < 0.05) y = -0.30;                  // sea floor (Mediterranean / Aqaba)
+    else if (fade < 0.30) y = Math.min(y, -0.10); // shallow shore
+    pos.setY(i, y);
+    const col = biomeColor(lng, lat, fade < 0.05 ? -1 : elev*fade, fade);
+    const n = (_hash(wx*9.7, wz*7.3) - 0.5) * 0.07;
+    colors[i*3]   = clamp(col.r + n, 0, 1);
+    colors[i*3+1] = clamp(col.g + n*0.85, 0, 1);
+    colors[i*3+2] = clamp(col.b + n*0.6, 0, 1);
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  geo.computeVertexNormals();
+
+  const mat = new THREE.MeshStandardMaterial({
+    vertexColors:true, roughness:0.95, metalness:0, flatShading:true
+  });
+  mapMesh = new THREE.Mesh(geo, mat);
+  scene.add(mapMesh);
+
+  /* Mediterranean / Aqaba sea sheet */
+  const sea = new THREE.Mesh(
+    new THREE.PlaneGeometry(MAP_W*1.6, MAP_H*1.6),
+    new THREE.MeshStandardMaterial({
+      color:0x2a4868, transparent:true, opacity:0.88,
+      roughness:0.35, metalness:0.05, depthWrite:false
+    })
+  );
+  sea.rotation.x = -Math.PI/2;
+  sea.position.y = -0.04;       // just below sea level (y=0)
+  sea.renderOrder = 1;
+  scene.add(sea);
+
+  /* coast line (drawn as thin line slightly above shore) */
+  const coastVerts = [];
+  for (let i=0; i<COASTLINE.length-1; i++){
+    const a = project3D(COASTLINE[i][0], COASTLINE[i][1], 0.04);
+    const b = project3D(COASTLINE[i+1][0], COASTLINE[i+1][1], 0.04);
+    coastVerts.push(a.x,a.y,a.z, b.x,b.y,b.z);
+  }
+  const cg = new THREE.BufferGeometry();
+  cg.setAttribute('position', new THREE.Float32BufferAttribute(coastVerts, 3));
+  scene.add(new THREE.LineSegments(cg,
+    new THREE.LineBasicMaterial({ color:0x3a2810, transparent:true, opacity:0.55 })));
+
+  /* Jordan River — follows the carved canyon, with a meandering S-shape
+     that mirrors the real river course (the "Ghor"). */
+  const JORDAN = [
+    [35.595,32.86],[35.585,32.78],[35.575,32.70],[35.560,32.60],
+    [35.555,32.50],[35.550,32.40],[35.545,32.30],[35.540,32.20],
+    [35.535,32.10],[35.530,32.00],[35.525,31.95],[35.522,31.88],
+    [35.520,31.80],[35.510,31.72],[35.495,31.65]
+  ];
+  buildRiverRibbon(JORDAN, { wStart:0.04, wEnd:0.09, color:0x3a6a98, shineCol:0xa8d0e8 });
+
+  /* ANCIENT ROADS — drawn as dashed amber paths slightly above terrain.
+     Two principal trade routes of the Bronze + Iron Ages: */
+  function buildRoad(coords, color, dashSize, opacity){
+    const pts = coords.map(([lng, lat]) => project3D(lng, lat, 0.20));
+    const curve = new THREE.CatmullRomCurve3(pts, false, 'centripetal', 0.4);
+    const samples = curve.getPoints(180);
+    const g = new THREE.BufferGeometry().setFromPoints(samples);
+    const m = new THREE.LineDashedMaterial({
+      color, transparent:true, opacity,
+      dashSize, gapSize:dashSize*0.6, depthTest:false, depthWrite:false
+    });
+    const line = new THREE.Line(g, m);
+    line.computeLineDistances();
+    line.renderOrder = 95;
+    scene.add(line);
+  }
+  // Via Maris ("Way of the Sea") — Egypt → coastal plain → Megiddo → Damascus
+  buildRoad([
+    [33.95, 30.50],[34.40, 30.85],[34.55, 31.30],[34.65, 31.55],
+    [34.75, 31.80],[34.85, 32.10],[34.95, 32.40],[35.10, 32.60],
+    [35.18, 32.55],[35.30, 32.55],[35.45, 32.65],[35.55, 32.85],
+    [35.70, 33.10],[35.95, 33.40]
+  ], 0xc8a868, 0.55, 0.65);
+  // King's Highway — Aqaba → Petra → Moab → Heshbon → Damascus (east of Jordan)
+  buildRoad([
+    [34.95, 29.55],[35.20, 30.00],[35.50, 30.40],[35.55, 30.65],
+    [35.65, 31.00],[35.70, 31.40],[35.75, 31.70],[35.78, 32.00],
+    [35.85, 32.40],[35.90, 32.80],[36.00, 33.20],[36.20, 33.50]
+  ], 0xb89060, 0.55, 0.55);
+
+  /* Sea of Galilee — stylized lake disc.
+     The lake is ~21 km long N–S × ~12 km wide. In our world units that's
+     about 0.19° N–S × 0.11° E–W → roughly 0.19·SCALE_Y × 0.11·SCALE_X
+     ≈ (2.3, 1.1) world units. We use depthTest:false + high renderOrder
+     so the disc is always drawn ON TOP of the surrounding terrain mesh,
+     regardless of its Y coordinate. */
+  const galilee = new THREE.Mesh(
+    new THREE.CircleGeometry(0.6, 48),                     // base radius (will scale)
+    new THREE.MeshBasicMaterial({
+      color:0x2a5882, transparent:true, opacity:0.95,
+      depthTest:false, depthWrite:false
+    })
+  );
+  galilee.geometry.scale(0.95, 1.7, 1);                    // E–W vs N–S — lake is taller than wide
+  galilee.rotation.x = -Math.PI/2;
+  // Sit visibly above the basin floor so it always renders on top.
+  const galileeY = -210 * ELEV_K + 0.18;
+  const gv = project3D(35.585, 32.82, 0);
+  galilee.position.set(gv.x, galileeY, gv.z);
+  galilee.renderOrder = 200;                                // above terrain
+  scene.add(galilee);
+  // Lighter highlight ring (gives the lake a more luminous look)
+  const galileeGloss = new THREE.Mesh(
+    new THREE.CircleGeometry(0.40, 36),
+    new THREE.MeshBasicMaterial({
+      color:0x9ed0e8, transparent:true, opacity:0.55,
+      depthTest:false, depthWrite:false
+    })
+  );
+  galileeGloss.geometry.scale(0.95, 1.7, 1);
+  galileeGloss.rotation.x = -Math.PI/2;
+  galileeGloss.position.set(gv.x, galileeY + 0.005, gv.z);
+  galileeGloss.renderOrder = 201;
+  scene.add(galileeGloss);
+
+  /* Dead Sea — bigger, stretched N-S, slightly mineral grey-green */
+  /* Dead Sea — narrow N–S strip (~50 km long × ~15 km wide).  Drawn with
+     depthTest:false so it always shows through the basin's terrain mesh. */
+  const dead = new THREE.Mesh(
+    new THREE.CircleGeometry(0.55, 48),
+    new THREE.MeshBasicMaterial({
+      color:0x4f6a70, transparent:true, opacity:0.95,
+      depthTest:false, depthWrite:false
+    })
+  );
+  dead.geometry.scale(0.5, 2.4, 1);                 // long N–S, narrow E–W
+  dead.rotation.x = -Math.PI/2;
+  const deadY = -430 * ELEV_K + 0.18;               // visibly above basin floor
+  const dv = project3D(35.47, 31.45, 0);
+  dead.position.set(dv.x, deadY, dv.z);
+  dead.renderOrder = 200;
+  scene.add(dead);
+  // Mineral / salt-rim highlight
+  const deadGloss = new THREE.Mesh(
+    new THREE.CircleGeometry(0.40, 36),
+    new THREE.MeshBasicMaterial({
+      color:0x9eb8c0, transparent:true, opacity:0.40,
+      depthTest:false, depthWrite:false
+    })
+  );
+  deadGloss.geometry.scale(0.5, 2.4, 1);
+  deadGloss.rotation.x = -Math.PI/2;
+  deadGloss.position.set(dv.x, deadY + 0.005, dv.z);
+  deadGloss.renderOrder = 201;
+  scene.add(deadGloss);
+
+  // Lisan Peninsula — the long sandy tongue (~lng 35.51, lat 31.30)
+  // that nearly separates the Dead Sea into a deep northern basin and a
+  // shallow southern basin.  Drawn as an angled tan ellipse on top.
+  const lisan = new THREE.Mesh(
+    new THREE.CircleGeometry(0.20, 24),
+    new THREE.MeshBasicMaterial({
+      color:0xb8a070, transparent:true, opacity:0.85,
+      depthTest:false, depthWrite:false
+    })
+  );
+  lisan.geometry.scale(0.55, 1.0, 1);   // long N–S
+  lisan.rotation.x = -Math.PI/2;
+  lisan.rotation.z = -0.20;             // slight tilt
+  const lv = project3D(35.49, 31.30, 0);
+  lisan.position.set(lv.x, deadY + 0.012, lv.z);
+  lisan.renderOrder = 202;
+  scene.add(lisan);
+
+  /* Journey paths — one for each layer (NT golden, OT lapis blue) */
+  function buildJourneyPath(layer, color){
+    const sorted = EVENTS.filter(e => e.layer === layer).slice().sort((a,b) => a.order - b.order);
+    if (sorted.length < 2) return null;
+    const pathPts = sorted.map(e => project3D(e.coord[0], e.coord[1], 0.45));
+    const pathCurve = new THREE.CatmullRomCurve3(pathPts, false, 'centripetal', 0.4);
+    const pg = new THREE.BufferGeometry().setFromPoints(pathCurve.getPoints(420));
+    const pathLine = new THREE.Line(pg,
+      new THREE.LineDashedMaterial({
+        color, dashSize:0.18, gapSize:0.14,
+        transparent:true, opacity:0.75, depthTest:false
+      })
+    );
+    pathLine.computeLineDistances();
+    pathLine.renderOrder = 110;
+    pathLine.userData.layer = layer;
+    scene.add(pathLine);
+    return pathLine;
+  }
+  const ntPath   = buildJourneyPath('nt',   0xf0c878);
+  const otPath   = buildJourneyPath('ot',   0x80a8e8);
+  const paulPath = buildJourneyPath('paul', 0xe88070);
+  // store globally for layer-toggle
+  window._layerObjects = { nt: [ntPath], ot: [otPath], paul: [paulPath] };
+
+  /* Event marker colors per layer (golden NT / lapis OT / crimson Paul) */
+  const LAYER_MARKER_COLORS = {
+    nt:   { disk:0xb89060, pillar:0xf0c878, pillarEmiss:0x4a2a08, top:0xfff0c0, topEmiss:0xffae40 },
+    ot:   { disk:0x506890, pillar:0x80a8e8, pillarEmiss:0x081844, top:0xc8e0ff, topEmiss:0x4080d0 },
+    paul: { disk:0x903a30, pillar:0xe88070, pillarEmiss:0x401004, top:0xffd0c4, topEmiss:0xc83820 },
+  };
+
+  EVENTS.forEach((ev, i) => {
+    const v = project3D(ev.coord[0], ev.coord[1], 0);
+    const c = LAYER_MARKER_COLORS[ev.layer] || LAYER_MARKER_COLORS.nt;
+    const diskColor    = c.disk;
+    const pillarColor  = c.pillar;
+    const pillarEmiss  = c.pillarEmiss;
+    const topColor     = c.top;
+    const topEmissive  = c.topEmiss;
+    // base disk
+    const disk = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.16, 0.20, 0.06, 16),
+      new THREE.MeshStandardMaterial({ color:diskColor, roughness:0.6, metalness:0.4,
+        transparent:true, opacity:1 })
+    );
+    disk.position.set(v.x, v.y + 0.04, v.z);
+    scene.add(disk);
+    // pillar
+    const h = 0.70;
+    const pillar = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.04, 0.06, h, 8),
+      new THREE.MeshStandardMaterial({
+        color:pillarColor, emissive:pillarEmiss, emissiveIntensity:0.6,
+        roughness:0.4, metalness:0.5,
+        transparent:true, opacity:1
+      })
+    );
+    pillar.position.set(v.x, v.y + 0.04 + h/2, v.z);
+    scene.add(pillar);
+    // glowing top sphere
+    const top = new THREE.Mesh(
+      new THREE.SphereGeometry(0.10, 12, 12),
+      new THREE.MeshStandardMaterial({
+        color:topColor, emissive:topEmissive, emissiveIntensity:1.1,
+        roughness:0.3, metalness:0.2,
+        transparent:true, opacity:1
+      })
+    );
+    top.position.set(v.x, v.y + 0.04 + h + 0.06, v.z);
+    top.userData.evIdx = i;
+    scene.add(top);
+    ev._markerTop = top;
+    ev._markerPillar = pillar;
+    ev._markerDisk = disk;
+    // register in layer-objects for toggle
+    window._layerObjects[ev.layer].push(disk, pillar, top);
+  });
+}
+
+/* River ribbon helper */
+function buildRiverRibbon(pts, R){
+  const curve = new THREE.CatmullRomCurve3(
+    pts.map(([lng,lat]) => project3D(lng, lat, 0)),
+    false, 'centripetal', 0.5
+  );
+  const N = 200;
+  const points = curve.getPoints(N);
+  const widths = [];
+  for (let i=0; i<=N; i++){
+    const t = i/N;
+    const s = t*t*(3 - 2*t);
+    widths.push(R.wStart + (R.wEnd - R.wStart) * s);
+  }
+  function makeRibbon(widthScale, yOffset){
+    const verts = []; const idx = [];
+    for (let i=0; i<=N; i++){
+      const a = points[i];
+      let tx, tz;
+      if (i < N){ tx = points[i+1].x - a.x; tz = points[i+1].z - a.z; }
+      else      { tx = a.x - points[i-1].x; tz = a.z - points[i-1].z; }
+      const len = Math.hypot(tx, tz) || 1;
+      tx /= len; tz /= len;
+      const nx = -tz, nz = tx;
+      const w = widths[i] * widthScale;
+      const ay = a.y + yOffset;
+      verts.push(a.x + nx*w, ay, a.z + nz*w);
+      verts.push(a.x - nx*w, ay, a.z - nz*w);
+      if (i < N){
+        const k = i*2;
+        idx.push(k, k+1, k+2,  k+1, k+3, k+2);
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+    g.setIndex(idx);
+    g.computeVertexNormals();
+    return g;
+  }
+  const water = new THREE.Mesh(makeRibbon(1.0, 0.20),
+    new THREE.MeshBasicMaterial({ color:R.color, transparent:true, opacity:0.95,
+      depthTest:false, depthWrite:false }));
+  water.renderOrder = 100; scene.add(water);
+  const shine = new THREE.Mesh(makeRibbon(0.40, 0.22),
+    new THREE.MeshBasicMaterial({ color:R.shineCol, transparent:true, opacity:0.6,
+      depthTest:false, depthWrite:false }));
+  shine.renderOrder = 101; scene.add(shine);
+}
+
+/* ===================== CITY & SEA LABELS (DOM, screen-space) ===================== */
+const cityEls = [];
+CITIES.forEach(c => {
+  const el = document.createElement('div');
+  el.className = 'city-label ' + (c.kind || 'city');
+  el.innerHTML = `<span class="dot"></span><span class="nm"></span>`;
+  document.body.appendChild(el);
+  cityEls.push(el);
+});
+const seaEls = [];
+SEAS.forEach(s => {
+  const el = document.createElement('div');
+  el.className = 'sea-label';
+  el.innerHTML = `<span class="nm"></span>`;
+  document.body.appendChild(el);
+  seaEls.push(el);
+});
+function refreshCityAndSeaLabels(){
+  CITIES.forEach((c, i) => {
+    cityEls[i].querySelector('.nm').textContent = (LANG === 'zh') ? c.zh : c.en;
+  });
+  SEAS.forEach((s, i) => {
+    seaEls[i].querySelector('.nm').textContent = (LANG === 'zh') ? s.zh : s.en;
+  });
+}
+function updateCityAndSeaLabels(){
+  CITIES.forEach((c, i) => {
+    const world = project3D(c.coord[0], c.coord[1], 0.10);
+    const v = world.clone().project(camera);
+    const visible = v.z < 1 && v.z > -1
+      && v.x > -1.05 && v.x < 1.05 && v.y > -1.05 && v.y < 1.05;
+    const el = cityEls[i];
+    if (!visible){ el.style.opacity = 0; return; }
+    const dist = camera.position.distanceTo(world);
+    const s = clamp(22 / dist, 0.5, 1.0);
+    const x = (v.x + 1) * 0.5 * innerWidth;
+    const y = (-v.y + 1) * 0.5 * innerHeight;
+    el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(8px, -50%) scale(${s.toFixed(3)})`;
+    // hide far-out cities when zoomed out (only capitals stay)
+    const fadeFar = clamp((60 - dist)/30, 0, 1);
+    el.style.opacity = (c.kind === 'capital') ? (0.3 + 0.7*fadeFar)
+                                              : (0.05 + 0.85*fadeFar);
+  });
+  SEAS.forEach((s, i) => {
+    // Sea labels float at a fixed altitude above sea level (y=0) so they
+    // are not buried inside basin floors (Dead Sea, Sea of Galilee).
+    const world = new THREE.Vector3(
+      (s.coord[0] - LNG_CENTER) * SCALE_X,
+      0.30,
+      -(s.coord[1] - LAT_CENTER) * SCALE_Y
+    );
+    const v = world.clone().project(camera);
+    const visible = v.z < 1 && v.z > -1
+      && v.x > -1.05 && v.x < 1.05 && v.y > -1.05 && v.y < 1.05;
+    const el = seaEls[i];
+    if (!visible){ el.style.opacity = 0; return; }
+    const dist = camera.position.distanceTo(world);
+    const sc = clamp(28 / dist, 0.55, 1.15);
+    const x = (v.x + 1) * 0.5 * innerWidth;
+    const y = (-v.y + 1) * 0.5 * innerHeight;
+    el.style.transform =
+      `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%) rotate(${s.rot}deg) scale(${sc.toFixed(3)})`;
+    el.style.opacity = 0.85;
+  });
+}
+
+/* ===================== EVENT LABELS (DOM, screen-space) ===================== */
+const labelEls = [];
+let activeIdx = -1;
+EVENTS.forEach((ev, i) => {
+  const el = document.createElement('div');
+  el.className = 'event-label ' + ev.layer;
+  el.innerHTML = `
+    <div class="pin"></div>
+    <div class="card">
+      <div class="name"></div>
+      <div class="place"></div>
+    </div>`;
+  el.addEventListener('click', () => openPanel(i));
+  el.addEventListener('mouseenter', () => { activeIdx = i; });
+  el.addEventListener('mouseleave', () => { activeIdx = -1; });
+  document.body.appendChild(el);
+  labelEls.push(el);
+});
+
+const _layout = [];
+function updateLabels(){
+  EVENTS.forEach((ev, i) => {
+    const world = project3D(ev.coord[0], ev.coord[1], 1.1);
+    const v = world.clone().project(camera);
+    const visible = v.z < 1 && v.z > -1
+      && v.x > -1.05 && v.x < 1.05 && v.y > -1.05 && v.y < 1.05;
+    const dist = camera.position.distanceTo(world);
+    const s = clamp(28 / dist, 0.55, 1.20);
+    const x = (v.x + 1) * 0.5 * innerWidth;
+    const y = (-v.y + 1) * 0.5 * innerHeight;
+    _layout[i] = { x, y, ax:x, ay:y, s, visible, depth:v.z };
+  });
+  // anti-overlap relaxation
+  const RX = 60, RY = 50;
+  for (let iter=0; iter<5; iter++){
+    for (let i=0;i<EVENTS.length;i++){
+      const a = _layout[i]; if (!a.visible) continue;
+      for (let j=i+1;j<EVENTS.length;j++){
+        const b = _layout[j]; if (!b.visible) continue;
+        const dx = b.ax - a.ax;
+        const dy = b.ay - a.ay;
+        const minX = (RX*(a.s+b.s)*0.5);
+        const minY = (RY*(a.s+b.s)*0.5);
+        const ex = dx / minX, ey = dy / minY;
+        const d2 = ex*ex + ey*ey;
+        if (d2 < 1 && d2 > 1e-6){
+          const f = (1 - Math.sqrt(d2)) * 0.5;
+          const wA = (b.depth + 1)*0.5 + 0.1;
+          const wB = (a.depth + 1)*0.5 + 0.1;
+          const tot = wA + wB;
+          a.ax -= dx * f * (wA/tot);
+          a.ay -= dy * f * (wA/tot);
+          b.ax += dx * f * (wB/tot);
+          b.ay += dy * f * (wB/tot);
+        }
+      }
+    }
+  }
+  // ===== Cluster detection =====
+  // When the camera is FAR (low zoom), group labels that are within
+  // CLUSTER_RADIUS_PX of each other into a single "+N" bubble.
+  // When the camera is CLOSE (high zoom), labels show individually.
+  const camDist = camera.position.distanceTo(controls.target);
+  const clustering = camDist > 35;        // threshold: only cluster when zoomed out
+  const CLUSTER_RADIUS_PX = 70;
+  const visibleByLayer = EVENTS.map((ev,i) =>
+    _layout[i].visible && LAYER_VISIBLE[ev.layer] && (
+      _tlYear == null || ev.year == null || Math.abs(ev.year - _tlYear) <= TIME_WINDOW
+    )
+  );
+  // Greedy clustering on screen-space positions
+  const clusters = []; // [{ cx, cy, members:[idx, ...] }]
+  const claimed = new Array(EVENTS.length).fill(false);
+  if (clustering){
+    for (let i=0;i<EVENTS.length;i++){
+      if (!visibleByLayer[i] || claimed[i]) continue;
+      const cl = { cx:_layout[i].x, cy:_layout[i].y, members:[i] };
+      claimed[i] = true;
+      for (let j=i+1;j<EVENTS.length;j++){
+        if (!visibleByLayer[j] || claimed[j]) continue;
+        const dx = _layout[j].x - cl.cx;
+        const dy = _layout[j].y - cl.cy;
+        if (dx*dx + dy*dy < CLUSTER_RADIUS_PX*CLUSTER_RADIUS_PX){
+          cl.members.push(j);
+          claimed[j] = true;
+        }
+      }
+      clusters.push(cl);
+    }
+  } else {
+    // No clustering — every visible event is its own "cluster of 1"
+    for (let i=0;i<EVENTS.length;i++){
+      if (!visibleByLayer[i]) continue;
+      clusters.push({ cx:_layout[i].x, cy:_layout[i].y, members:[i] });
+      claimed[i] = true;
+    }
+  }
+  // Hide labels that are inside multi-event clusters; show solo
+  const clusteredIdx = new Set();
+  clusters.forEach(cl => { if (cl.members.length > 1) cl.members.forEach(m => clusteredIdx.add(m)); });
+
+  EVENTS.forEach((ev, i) => {
+    const lay = _layout[i];
+    const el = labelEls[i];
+    if (!LAYER_VISIBLE[ev.layer]){ el.style.opacity = 0; el.style.pointerEvents = 'none'; return; }
+    el.style.pointerEvents = 'auto';
+    if (!lay.visible){ el.style.opacity = 0; return; }
+    if (clusteredIdx.has(i) && _expandedCluster !== _clusterKeyFor(i)){
+      // hidden inside a cluster bubble (unless that cluster is expanded)
+      el.style.opacity = 0;
+      el.style.pointerEvents = 'none';
+      return;
+    }
+    el.style.transform =
+      `translate(${lay.ax.toFixed(1)}px, ${lay.ay.toFixed(1)}px) translate(-50%, -100%) scale(${lay.s.toFixed(3)})`;
+    el.style.opacity = (i === activeIdx || activeIdx === -1) ? 1 : 0.30;
+    el.style.zIndex = (i === activeIdx) ? 12 : 10;
+  });
+
+  // Render cluster bubbles
+  renderClusterBubbles(clusters);
+}
+
+// Track which cluster (by member-set hash) is currently expanded
+let _expandedCluster = null;
+function _clusterKeyFor(eventIdx){
+  // We re-derive from visible clusters in the next frame. Simple membership
+  // test: find cluster containing this index in _lastClusters.
+  if (!_lastClusters) return null;
+  for (const cl of _lastClusters){
+    if (cl.members.includes(eventIdx)) return cl.key;
+  }
+  return null;
+}
+
+let _lastClusters = null;
+let _clusterContainer = null;
+function renderClusterBubbles(clusters){
+  if (!_clusterContainer){
+    _clusterContainer = document.createElement('div');
+    _clusterContainer.id = 'cluster-layer';
+    _clusterContainer.style.position = 'fixed';
+    _clusterContainer.style.inset = '0';
+    _clusterContainer.style.pointerEvents = 'none';
+    _clusterContainer.style.zIndex = '11';
+    document.body.appendChild(_clusterContainer);
+  }
+  // Cache members hash for stable expand state
+  clusters.forEach(c => { c.key = c.members.join(','); });
+  _lastClusters = clusters;
+  // Render only multi-member clusters
+  const multi = clusters.filter(c => c.members.length > 1);
+  // (Re)build DOM cheaply
+  _clusterContainer.innerHTML = '';
+  multi.forEach(cl => {
+    const bubble = document.createElement('div');
+    bubble.className = 'cluster-bubble';
+    bubble.style.left = cl.cx + 'px';
+    bubble.style.top  = cl.cy + 'px';
+    bubble.style.pointerEvents = 'auto';
+    // Layer composition (most common color wins)
+    const counts = {nt:0, ot:0, paul:0};
+    cl.members.forEach(m => counts[EVENTS[m].layer]++);
+    const dominant = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
+    bubble.classList.add('layer-' + dominant);
+    bubble.textContent = '+' + cl.members.length;
+    bubble.title = cl.members.map(m => txt(EVENTS[m], 'name')).join('\n');
+    bubble.addEventListener('click', () => {
+      _expandedCluster = (_expandedCluster === cl.key) ? null : cl.key;
+    });
+    _clusterContainer.appendChild(bubble);
+  });
+}
+
+/* ===================== DETAIL PANEL ===================== */
+const panel = document.getElementById('panel');
+let _activePanelIdx = -1;
+function openPanel(i){
+  _activePanelIdx = i;
+  renderPanel();
+  panel.classList.add('show');
+  // Spawn the event-specific effect at the event's location
+  if (typeof spawnEffect === 'function') spawnEffect(EVENTS[i]);
+  flyTo(EVENTS[i]);
+}
+function renderPanel(){
+  if (_activePanelIdx < 0) return;
+  const ev = EVENTS[_activePanelIdx];
+  document.getElementById('p-title').textContent = `${ev.order}. ${txt(ev,'name')}`;
+  document.getElementById('p-place').textContent = txt(ev,'place');
+  document.getElementById('p-ref').textContent   = ev.ref;
+  document.getElementById('p-desc').textContent  = txt(ev,'desc');
+  document.getElementById('p-scrip').textContent = txt(ev,'scripture');
+  // Year + era badge
+  const yearEl = document.getElementById('p-year');
+  if (yearEl){
+    if (ev.year != null){
+      const era = ERAS.find(e => ev.year >= e.from && ev.year <= e.to);
+      const eraName = era ? (LANG==='zh' ? era.zh : era.en) : '';
+      yearEl.innerHTML = `<span class="year-tag">${formatYear(ev.year)}</span>` +
+                         (eraName ? `<span class="era-tag">${eraName}</span>` : '');
+      yearEl.style.display = 'block';
+    } else {
+      yearEl.style.display = 'none';
+    }
+  }
+  // Layer accent on panel border
+  panel.dataset.layer = ev.layer;
+}
+function closePanel(){
+  panel.classList.remove('show');
+  _activePanelIdx = -1;
+  if (typeof clearActiveEffect === 'function') clearActiveEffect();
+}
+window.closePanel = closePanel;
+
+/* Step prev/next through events of the current event's layer (in order) */
+function navPanel(dir){
+  if (_activePanelIdx < 0) return;
+  const cur = EVENTS[_activePanelIdx];
+  const sameLayer = EVENTS
+    .map((e,i) => ({e, i}))
+    .filter(o => o.e.layer === cur.layer)
+    .sort((a,b) => (a.e.year ?? 0) - (b.e.year ?? 0) || a.e.order - b.e.order);
+  const pos = sameLayer.findIndex(o => o.i === _activePanelIdx);
+  if (pos < 0) return;
+  const next = sameLayer[(pos + dir + sameLayer.length) % sameLayer.length];
+  openPanel(next.i);
+}
+window.navPanel = navPanel;
+
+/* Keyboard accessibility */
+window.addEventListener('keydown', e => {
+  // Don't intercept while typing in the search box
+  if (document.activeElement === searchInput) return;
+  switch(e.key){
+    case 'Escape':
+      closePanel();
+      _expandedCluster = null;
+      break;
+    case 'ArrowLeft':
+      if (_activePanelIdx >= 0) navPanel(-1);
+      break;
+    case 'ArrowRight':
+      if (_activePanelIdx >= 0) navPanel(+1);
+      break;
+    case '/':
+    case 's':
+      // focus search
+      searchInput.focus();
+      e.preventDefault();
+      break;
+    case ' ':
+      // toggle timeline play
+      if (e.target === document.body){ toggleTimelinePlay(); e.preventDefault(); }
+      break;
+    case 'a':
+      toggleAllLayers();
+      break;
+  }
+});
+
+/* ===================== LANGUAGE SWITCHING ===================== */
+function refreshLabels(){
+  EVENTS.forEach((ev, i) => {
+    const el = labelEls[i];
+    el.querySelector('.name').textContent  = `${ev.order}. ${txt(ev,'name')}`;
+    el.querySelector('.place').textContent = txt(ev,'place');
+  });
+}
+function applyStaticTexts(){
+  document.querySelectorAll('[data-en]').forEach(el => {
+    const k = LANG === 'zh' ? 'zh' : 'en';
+    if (el.dataset[k] != null) el.textContent = el.dataset[k];
+  });
+  document.title = LANG === 'zh'
+    ? '耶稣基督的一生 — 圣地三维地图'
+    : 'The Life of Jesus Christ — A 3D Map of the Holy Land';
+}
+function setLang(l){
+  LANG = (l === 'zh') ? 'zh' : 'en';
+  document.body.classList.toggle('zh', LANG === 'zh');
+  document.getElementById('btn-en').classList.toggle('active', LANG === 'en');
+  document.getElementById('btn-zh').classList.toggle('active', LANG === 'zh');
+  applyStaticTexts();
+  refreshLabels();
+  refreshCityAndSeaLabels();
+  renderPanel();
+  // update search-input placeholder for the active language
+  const inp = document.getElementById('search-input');
+  if (inp){
+    const ph = inp.getAttribute('data-placeholder-' + LANG);
+    if (ph) inp.placeholder = ph;
+  }
+  saveSettings();
+}
+window.setLang = setLang;
+
+/* ===================== PERSISTENCE ===================== */
+const STORAGE_KEY = 'jesus-map-of-israel.v1';
+function saveSettings(){
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      lang: LANG, layers: LAYER_VISIBLE
+    }));
+  } catch(_){}
+}
+function loadSettings(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch(_) { return null; }
+}
+
+/* Layer visibility toggle (NT / OT / Paul) */
+const LAYERS = ['nt','ot','paul'];
+function applyLayerVisibility(){
+  const objs = window._layerObjects || {};
+  LAYERS.forEach(layer => {
+    const arr = objs[layer] || [];
+    arr.forEach(o => { if (o) o.visible = !!LAYER_VISIBLE[layer]; });
+  });
+  // also close panel if its event is now hidden
+  if (_activePanelIdx >= 0){
+    const ev = EVENTS[_activePanelIdx];
+    if (!LAYER_VISIBLE[ev.layer]) closePanel();
+  }
+  LAYERS.forEach(layer => {
+    const btn = document.getElementById('btn-' + layer);
+    if (btn) btn.classList.toggle('active', !!LAYER_VISIBLE[layer]);
+  });
+  // Sync timeline marker visibility too
+  if (typeof refreshTimelineMarkerVisibility === 'function') refreshTimelineMarkerVisibility();
+}
+function toggleLayer(layer){
+  LAYER_VISIBLE[layer] = !LAYER_VISIBLE[layer];
+  // never let all three be off — keep at least one shown
+  if (!LAYERS.some(l => LAYER_VISIBLE[l])){
+    LAYER_VISIBLE[layer] = true;
+  }
+  applyLayerVisibility();
+  saveSettings();
+}
+window.toggleLayer = toggleLayer;
+
+/* "All / None" — turn every layer on; if every layer is already on, turn all but NT off. */
+function toggleAllLayers(){
+  const allOn = LAYERS.every(l => LAYER_VISIBLE[l]);
+  LAYERS.forEach(l => { LAYER_VISIBLE[l] = !allOn; });
+  if (allOn) LAYER_VISIBLE.nt = true;       // never zero
+  applyLayerVisibility();
+  saveSettings();
+}
+window.toggleAllLayers = toggleAllLayers;
+
+let _flyT = null;
+function flyTo(ev){
+  const target = project3D(ev.coord[0], ev.coord[1], 0.5);
+  const camFrom = camera.position.clone();
+  const tgtFrom = controls.target.clone();
+  // Choose camera direction: from the OPPOSITE side of the map so edge
+  // events (Petra in the SE, Eilat in the south, Sidon in the north) are
+  // viewed from the inside of the map looking out, not from off-screen.
+  const dx = ev.coord[0] - LNG_CENTER;
+  const dy = ev.coord[1] - LAT_CENTER;
+  const len = Math.hypot(dx, dy) || 1;
+  const offX =  dx / len * 0.9;       // pull camera toward event (XZ direction)
+  const offZ = -dy / len * 0.9;
+  const camDir = new THREE.Vector3(offX, 1.5, offZ + 0.3).normalize();
+  const camTo = target.clone().add(camDir.multiplyScalar(9));
+  const t0 = performance.now();
+  if (_flyT) cancelAnimationFrame(_flyT);
+  function step(){
+    const t = clamp((performance.now() - t0) / 1100, 0, 1);
+    const k = t<.5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2;
+    camera.position.lerpVectors(camFrom, camTo, k);
+    controls.target.lerpVectors(tgtFrom, target, k);
+    controls.update();
+    if (t < 1) _flyT = requestAnimationFrame(step);
+  }
+  step();
+}
+
+/* click on 3D marker */
+const raycaster = new THREE.Raycaster();
+const mouseV = new THREE.Vector2();
+canvas.addEventListener('click', (e) => {
+  mouseV.x = (e.clientX / innerWidth) * 2 - 1;
+  mouseV.y = -(e.clientY / innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouseV, camera);
+  const tops = EVENTS.filter(ev => LAYER_VISIBLE[ev.layer] && ev._markerTop).map(ev => ev._markerTop);
+  const hit = raycaster.intersectObjects(tops)[0];
+  if (hit){
+    const idx = hit.object.userData.evIdx;
+    if (idx != null) openPanel(idx);
+  }
+});
+
+/* ===================== ANIMATE ===================== */
+/* ===================== EVENT EFFECTS SYSTEM ===================== */
+// Active effect manager: spawns a 3D mini-animation at the event's
+// world position when openPanel is called.  Only one effect plays at
+// a time (older one is removed).  Each effect is a THREE.Group with
+// an update(dt) method.
+let _activeEffect = null;
+const _effectClock = { last: performance.now() };
+
+function clearActiveEffect(){
+  if (_activeEffect){
+    if (_activeEffect.dispose) _activeEffect.dispose();
+    if (_activeEffect.group) scene.remove(_activeEffect.group);
+    _activeEffect = null;
+  }
+}
+function spawnEffect(ev){
+  clearActiveEffect();
+  const factory = EFFECT_FACTORY[ev.effect] || EFFECT_FACTORY.glow_radiance;
+  const v = project3D(ev.coord[0], ev.coord[1], 0);
+  const fx = factory(v, ev);
+  if (fx) {
+    fx.startTime = performance.now();
+    scene.add(fx.group);
+    _activeEffect = fx;
+  }
+}
+function updateEffects(now){
+  if (!_activeEffect) return;
+  const dt = (now - _effectClock.last) / 1000;
+  if (_activeEffect.update) _activeEffect.update(dt, (now - _activeEffect.startTime)/1000);
+}
+// Helper to make a sprite-glow plane that always faces the camera-up
+function makeGlowSprite(color, size, opacity=0.8){
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 128;
+  const cx = cv.getContext('2d');
+  const grad = cx.createRadialGradient(64,64,0, 64,64,64);
+  grad.addColorStop(0, 'rgba(255,255,255,1)');
+  grad.addColorStop(0.3, 'rgba(255,255,255,0.6)');
+  grad.addColorStop(1, 'rgba(255,255,255,0)');
+  cx.fillStyle = grad; cx.fillRect(0,0,128,128);
+  const tex = new THREE.CanvasTexture(cv);
+  const m = new THREE.SpriteMaterial({ map:tex, color, transparent:true, opacity, depthWrite:false });
+  const s = new THREE.Sprite(m);
+  s.scale.set(size, size, 1);
+  return s;
+}
+
+const EFFECT_FACTORY = {};
+
+/* ---------- Building-block effect: glowing radiant column ---------- */
+EFFECT_FACTORY.glow_radiance = (origin) => {
+  const group = new THREE.Group();
+  group.position.copy(origin);
+  // base disc
+  const disc = makeGlowSprite(0xffe0a0, 4.5, 0.55);
+  disc.position.y = 0.05;
+  group.add(disc);
+  // vertical column
+  const col = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.05, 0.40, 4.0, 16, 1, true),
+    new THREE.MeshBasicMaterial({
+      color:0xffe6a8, transparent:true, opacity:0.45,
+      depthWrite:false, side:THREE.DoubleSide,
+      blending:THREE.AdditiveBlending
+    })
+  );
+  col.position.y = 2.0; group.add(col);
+  // sparkle motes
+  const moteCount = 30;
+  const motePos = new Float32Array(moteCount * 3);
+  for (let i=0;i<moteCount;i++){
+    motePos[i*3]   = (Math.random()-0.5) * 0.8;
+    motePos[i*3+1] = Math.random() * 3.5;
+    motePos[i*3+2] = (Math.random()-0.5) * 0.8;
+  }
+  const motesGeo = new THREE.BufferGeometry();
+  motesGeo.setAttribute('position', new THREE.BufferAttribute(motePos, 3));
+  const motes = new THREE.Points(motesGeo,
+    new THREE.PointsMaterial({ color:0xfff4c0, size:0.10, transparent:true, opacity:0.9,
+      depthWrite:false, blending:THREE.AdditiveBlending }));
+  group.add(motes);
+  return {
+    group, disc, col, motes, motePos,
+    update(dt, t){
+      col.material.opacity = 0.45 + Math.sin(t*2)*0.15;
+      disc.material.opacity = 0.55 + Math.sin(t*2.5)*0.20;
+      // motes rise & loop
+      const a = motes.geometry.attributes.position.array;
+      for (let i=0;i<moteCount;i++){
+        a[i*3+1] += dt * 0.6;
+        if (a[i*3+1] > 3.8){ a[i*3+1] = 0; }
+      }
+      motes.geometry.attributes.position.needsUpdate = true;
+    }
+  };
+};
+
+// === Aliased default effects (rich variants reuse glow_radiance with tinting) ===
+function _alias(orig, color, motesColor){
+  return (origin) => {
+    const fx = EFFECT_FACTORY.glow_radiance(origin);
+    fx.col.material.color.setHex(color);
+    fx.disc.material.color.setHex(color);
+    if (motesColor) fx.motes.material.color.setHex(motesColor);
+    return fx;
+  };
+}
+EFFECT_FACTORY.transfiguration_burst = _alias('glow_radiance', 0xffffff, 0xfff4ff);
+EFFECT_FACTORY.empty_tomb_radiance   = _alias('glow_radiance', 0xfff8e0, 0xffffff);
+EFFECT_FACTORY.damascus_light        = _alias('glow_radiance', 0xfff8c8, 0xffffff);
+EFFECT_FACTORY.sermon                = _alias('glow_radiance', 0xfff0c8, 0xfff4d8);
+EFFECT_FACTORY.crown_radiance        = _alias('glow_radiance', 0xffd870, 0xfff0a0);
+
+/* ---------- DOVE: descending bird ---------- */
+EFFECT_FACTORY.dove_descending = (origin) => {
+  const group = new THREE.Group();
+  group.position.copy(origin);
+  // pillar of light (faded)
+  const ray = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.02, 0.45, 5, 12, 1, true),
+    new THREE.MeshBasicMaterial({ color:0xfff0c0, transparent:true, opacity:0.30,
+      depthWrite:false, side:THREE.DoubleSide, blending:THREE.AdditiveBlending })
+  );
+  ray.position.y = 2.5; group.add(ray);
+  // dove (white sphere + 2 wings)
+  const dove = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 12),
+    new THREE.MeshBasicMaterial({ color:0xffffff }));
+  dove.add(body);
+  const wL = new THREE.Mesh(new THREE.PlaneGeometry(0.30, 0.10),
+    new THREE.MeshBasicMaterial({ color:0xffffff, transparent:true, opacity:0.85, side:THREE.DoubleSide }));
+  wL.position.x = -0.16; dove.add(wL);
+  const wR = wL.clone(); wR.position.x = 0.16; dove.add(wR);
+  dove.position.y = 4.5; group.add(dove);
+  return {
+    group, ray, dove, wL, wR,
+    update(dt, t){
+      dove.position.y = Math.max(0.6, 4.5 - t * 1.5);
+      const flap = Math.sin(t*8) * 0.6;
+      wL.rotation.z = flap;
+      wR.rotation.z = -flap;
+      ray.material.opacity = 0.30 + Math.sin(t*2)*0.10;
+    }
+  };
+};
+EFFECT_FACTORY.water_dove = EFFECT_FACTORY.dove_descending;
+EFFECT_FACTORY.rainbow_dove = EFFECT_FACTORY.dove_descending;
+
+/* ---------- STAR (Bethlehem): pulsing high star + ray ---------- */
+EFFECT_FACTORY.star_of_bethlehem = (origin) => {
+  const group = new THREE.Group();
+  group.position.copy(origin);
+  // ray downward
+  const ray = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.01, 0.30, 5.5, 12, 1, true),
+    new THREE.MeshBasicMaterial({ color:0xfff8d0, transparent:true, opacity:0.6,
+      depthWrite:false, side:THREE.DoubleSide, blending:THREE.AdditiveBlending })
+  );
+  ray.position.y = 2.75; group.add(ray);
+  // star sprite at top
+  const star = makeGlowSprite(0xffffff, 1.6, 1);
+  star.position.y = 5.5; group.add(star);
+  return {
+    group, star, ray,
+    update(dt, t){
+      const p = 1 + Math.sin(t*4)*0.2;
+      star.scale.set(1.6*p, 1.6*p, 1);
+      star.material.opacity = 0.9 + Math.sin(t*3)*0.1;
+      ray.material.opacity = 0.55 + Math.sin(t*2)*0.15;
+    }
+  };
+};
+
+/* ---------- CLOUD ASCENDING (Ascension): figure rising ---------- */
+EFFECT_FACTORY.cloud_ascending = (origin) => {
+  const group = new THREE.Group();
+  group.position.copy(origin);
+  // cloud sphere
+  const cloud = new THREE.Mesh(
+    new THREE.SphereGeometry(0.6, 16, 12),
+    new THREE.MeshBasicMaterial({ color:0xffffff, transparent:true, opacity:0.85, depthWrite:false })
+  );
+  cloud.scale.set(1.5, 0.6, 1.5);
+  cloud.position.y = 2.5; group.add(cloud);
+  // figure (small column)
+  const fig = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.08, 0.10, 0.45, 8),
+    new THREE.MeshBasicMaterial({ color:0xfff8d0, transparent:true, opacity:0.95 })
+  );
+  fig.position.y = 0.4; group.add(fig);
+  return {
+    group, cloud, fig,
+    update(dt, t){
+      fig.position.y = Math.min(2.4, 0.4 + t * 0.5);
+      fig.material.opacity = Math.max(0.1, 1 - t*0.25);
+      cloud.position.y = 2.5 + Math.sin(t*1.5)*0.10;
+    }
+  };
+};
+
+/* ---------- CROSS ECLIPSE: 3 crosses on a hill, sky darkens ---------- */
+EFFECT_FACTORY.cross_eclipse = (origin) => {
+  const group = new THREE.Group();
+  group.position.copy(origin);
+  function makeCross(x){
+    const g = new THREE.Group();
+    const v = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.95, 0.10),
+      new THREE.MeshBasicMaterial({ color:0x3a1f0a }));
+    v.position.y = 0.5; g.add(v);
+    const h = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.10, 0.10),
+      new THREE.MeshBasicMaterial({ color:0x3a1f0a }));
+    h.position.y = 0.78; g.add(h);
+    g.position.x = x;
+    return g;
+  }
+  group.add(makeCross(-0.5), makeCross(0), makeCross(0.5));
+  // dark cloud above
+  const dark = new THREE.Mesh(
+    new THREE.PlaneGeometry(3, 1.5),
+    new THREE.MeshBasicMaterial({ color:0x100808, transparent:true, opacity:0,
+      depthWrite:false, side:THREE.DoubleSide })
+  );
+  dark.position.y = 2.0;
+  dark.rotation.x = -Math.PI/2.5;
+  group.add(dark);
+  // golden glow around center cross
+  const glow = makeGlowSprite(0xffd870, 1.6, 0);
+  glow.position.set(0, 0.9, 0);
+  group.add(glow);
+  return {
+    group, dark, glow,
+    update(dt, t){
+      // 0..3s: darkening; 3..6s: glow
+      dark.material.opacity = clamp(t/3, 0, 0.85) * (t<6 ? 1 : Math.max(0, 1 - (t-6)/2));
+      glow.material.opacity = t > 4 ? clamp((t-4)/1.5, 0, 0.9) : 0;
+    }
+  };
+};
+
+/* ---------- SEA PARTING (Red Sea, Jordan): wall of water on each side ---------- */
+EFFECT_FACTORY.sea_parting = (origin) => {
+  const group = new THREE.Group();
+  group.position.copy(origin);
+  function makeWall(x){
+    const g = new THREE.Mesh(new THREE.BoxGeometry(0.30, 1.5, 3),
+      new THREE.MeshBasicMaterial({ color:0x3a82c8, transparent:true, opacity:0.7,
+        depthWrite:false, side:THREE.DoubleSide }));
+    g.position.set(x, 0.75, 0);
+    return g;
+  }
+  const wL = makeWall(-0.6); group.add(wL);
+  const wR = makeWall( 0.6); group.add(wR);
+  // dry path glow
+  const path = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 3),
+    new THREE.MeshBasicMaterial({ color:0xc8a868, transparent:true, opacity:0.7, depthWrite:false }));
+  path.rotation.x = -Math.PI/2; path.position.y = 0.05;
+  group.add(path);
+  return {
+    group, wL, wR,
+    update(dt, t){
+      const sep = clamp(t * 0.4, 0, 0.6);
+      wL.position.x = -0.4 - sep;
+      wR.position.x =  0.4 + sep;
+      const wave = Math.sin(t*4)*0.05;
+      wL.scale.y = 1 + wave;
+      wR.scale.y = 1 - wave;
+    }
+  };
+};
+
+/* ---------- SINAI FIRE (mountain peak fire + smoke) ---------- */
+EFFECT_FACTORY.sinai_fire = (origin) => {
+  const group = new THREE.Group();
+  group.position.copy(origin);
+  // mountain triangle backdrop
+  const mountain = new THREE.Mesh(
+    new THREE.ConeGeometry(0.8, 1.5, 6),
+    new THREE.MeshBasicMaterial({ color:0x8a6a3a })
+  );
+  mountain.position.y = 0.75; group.add(mountain);
+  // fire sprite at peak
+  const fire = makeGlowSprite(0xff8030, 1.5, 0.85);
+  fire.position.y = 1.6; group.add(fire);
+  // smoke column
+  const smokeCount = 24;
+  const smokePos = new Float32Array(smokeCount * 3);
+  for (let i=0;i<smokeCount;i++){
+    smokePos[i*3]   = (Math.random()-0.5) * 0.4;
+    smokePos[i*3+1] = 1.6 + Math.random() * 2.5;
+    smokePos[i*3+2] = (Math.random()-0.5) * 0.4;
+  }
+  const smokeGeo = new THREE.BufferGeometry();
+  smokeGeo.setAttribute('position', new THREE.BufferAttribute(smokePos, 3));
+  const smoke = new THREE.Points(smokeGeo,
+    new THREE.PointsMaterial({ color:0x4a3a2a, size:0.30, transparent:true, opacity:0.55,
+      depthWrite:false }));
+  group.add(smoke);
+  return {
+    group, fire, smoke,
+    update(dt, t){
+      fire.material.opacity = 0.7 + Math.sin(t*6)*0.20;
+      const a = smoke.geometry.attributes.position.array;
+      for (let i=0;i<smokeCount;i++){
+        a[i*3+1] += dt * 0.5;
+        if (a[i*3+1] > 4.0){ a[i*3+1] = 1.6; }
+      }
+      smoke.geometry.attributes.position.needsUpdate = true;
+    }
+  };
+};
+EFFECT_FACTORY.fire_from_heaven = EFFECT_FACTORY.sinai_fire;
+EFFECT_FACTORY.brimstone_fire   = EFFECT_FACTORY.sinai_fire;
+EFFECT_FACTORY.altar_fire       = EFFECT_FACTORY.sinai_fire;
+EFFECT_FACTORY.temple_burning   = EFFECT_FACTORY.sinai_fire;
+
+/* ---------- WALLS COLLAPSE (Jericho) ---------- */
+EFFECT_FACTORY.walls_collapse = (origin) => {
+  const group = new THREE.Group();
+  group.position.copy(origin);
+  // four walls
+  const walls = [];
+  for (let i=0;i<8;i++){
+    const w = new THREE.Mesh(
+      new THREE.BoxGeometry(0.30, 0.80, 0.20),
+      new THREE.MeshBasicMaterial({ color:0xb89060 })
+    );
+    const ang = i / 8 * Math.PI * 2;
+    w.position.set(Math.cos(ang)*0.7, 0.4, Math.sin(ang)*0.7);
+    w.lookAt(0, 0.4, 0);
+    walls.push(w);
+    group.add(w);
+  }
+  // dust cloud
+  const dust = makeGlowSprite(0xc8a060, 2.5, 0);
+  dust.position.y = 0.3;
+  group.add(dust);
+  return {
+    group, walls, dust,
+    update(dt, t){
+      // walls fall after t=1
+      walls.forEach((w,i) => {
+        if (t > 1 + i*0.1){
+          w.rotation.z = Math.min(Math.PI/2, (t - 1 - i*0.1) * 1.8);
+          w.position.y = Math.max(0.05, 0.4 - (t - 1 - i*0.1)*0.4);
+        }
+      });
+      dust.material.opacity = clamp((t-1.5)/1.5, 0, 0.6) * Math.max(0, 1 - (t-4)/3);
+    }
+  };
+};
+
+/* ---------- CARAVAN: dots moving across the map ---------- */
+EFFECT_FACTORY.caravan = (origin) => {
+  const group = new THREE.Group();
+  group.position.copy(origin);
+  // 5 traveler dots in a line
+  const dots = [];
+  for (let i=0;i<5;i++){
+    const d = new THREE.Mesh(new THREE.SphereGeometry(0.10, 8, 8),
+      new THREE.MeshBasicMaterial({ color:0x7a5028 }));
+    d.position.set(0, 0.15, -i*0.3);
+    dots.push(d); group.add(d);
+  }
+  // dust trail
+  const trail = makeGlowSprite(0xc8a060, 2.0, 0.4);
+  trail.position.y = 0.1;
+  group.add(trail);
+  return {
+    group, dots,
+    update(dt, t){
+      dots.forEach((d, i) => {
+        d.position.x = Math.sin(t*0.5 + i*0.3) * 0.5;
+        d.position.z = -i*0.3 + Math.cos(t*0.5)*0.3;
+      });
+    }
+  };
+};
+
+/* ---------- SAILING SHIP (Jonah / Paul voyages) ---------- */
+EFFECT_FACTORY.sailing_ship = (origin) => {
+  const group = new THREE.Group();
+  group.position.copy(origin);
+  // hull
+  const hull = new THREE.Mesh(
+    new THREE.BoxGeometry(0.6, 0.18, 0.30),
+    new THREE.MeshBasicMaterial({ color:0x6a4520 })
+  );
+  hull.position.y = 0.30; group.add(hull);
+  // mast
+  const mast = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.025, 0.025, 0.7, 8),
+    new THREE.MeshBasicMaterial({ color:0x4a3018 })
+  );
+  mast.position.y = 0.75; group.add(mast);
+  // sail
+  const sail = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.45, 0.50),
+    new THREE.MeshBasicMaterial({ color:0xf0e0c0, side:THREE.DoubleSide })
+  );
+  sail.position.y = 0.85; group.add(sail);
+  // ripples beneath
+  const ripple = makeGlowSprite(0x5080a8, 2.0, 0.6);
+  ripple.position.y = 0.05;
+  group.add(ripple);
+  return {
+    group,
+    update(dt, t){
+      group.position.x += dt * 0.3;
+      group.position.z += dt * 0.15;
+      group.rotation.y = -0.5;
+      hull.rotation.z = Math.sin(t*1.5) * 0.05;
+      sail.material.opacity = 0.9 + Math.sin(t*2)*0.1;
+    }
+  };
+};
+
+/* ---------- FLAME TONGUES (Pentecost) ---------- */
+EFFECT_FACTORY.flame_tongues = (origin) => {
+  const group = new THREE.Group();
+  group.position.copy(origin);
+  const flames = [];
+  for (let i=0;i<12;i++){
+    const ang = i / 12 * Math.PI * 2;
+    const f = makeGlowSprite(0xff6020, 0.8, 0.9);
+    f.position.set(Math.cos(ang)*0.5, 0.8 + Math.random()*0.2, Math.sin(ang)*0.5);
+    f.userData = { ang, baseY:f.position.y };
+    flames.push(f); group.add(f);
+  }
+  // wind sound (visual)
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(0.4, 0.8, 32),
+    new THREE.MeshBasicMaterial({ color:0xff8040, transparent:true, opacity:0.4,
+      side:THREE.DoubleSide, depthWrite:false })
+  );
+  ring.rotation.x = -Math.PI/2;
+  ring.position.y = 0.05;
+  group.add(ring);
+  return {
+    group, flames, ring,
+    update(dt, t){
+      flames.forEach((f, i) => {
+        f.position.y = f.userData.baseY + Math.sin(t*5 + i)*0.10;
+        f.material.opacity = 0.7 + Math.sin(t*7 + i*0.5)*0.25;
+      });
+      ring.scale.setScalar(1 + Math.sin(t*3)*0.15);
+    }
+  };
+};
+
+/* ---------- All other effects: alias to glow_radiance with custom color ---------- */
+const _effectAliases = {
+  altar_smoke:        [0xa89070, 0x808080],
+  altar_fire:         [0xff8030, 0xffa040],
+  wilderness_wind:    [0xc8a868, 0xd8b878],
+  wine_pouring:       [0x8a3030, 0xc04848],
+  fishing_boats:      [0x80a0c8, 0xa0c0e0],
+  storm_calm:         [0x506880, 0x80a0c0],
+  loaves_fishes:      [0xe8c878, 0xfff0a0],
+  walking_water:      [0xa0d0e8, 0xffffff],
+  well_water:         [0x4a82a0, 0xa8d8e8],
+  tomb_open:          [0xfff8e0, 0xffffff],
+  sycamore_tree:      [0x4a8030, 0x80c060],
+  palm_petals:        [0x60a040, 0xa0d080],
+  cup_bread:          [0xc09060, 0xfff0c0],
+  olive_drops:        [0x4a4030, 0x808060],
+  walking_companions: [0xa08060, 0xffd890],
+  jacob_ladder:       [0xfff0c0, 0xffffff],
+  mountain_view:      [0xa89880, 0xffd070],
+  tabernacle:         [0xc8a060, 0xfff0a0],
+  oil_anointing:      [0xe8b870, 0xffd870],
+  sword_smoke:        [0x808080, 0xc8c8c8],
+  sling_strike:       [0xa0a0a0, 0xffffff],
+  temple_columns:     [0xe8d0a0, 0xfff8e0],
+  martyr_stones:      [0x808070, 0xa0a090],
+  chains_break:       [0xa8a8a8, 0xffd870],
+};
+Object.entries(_effectAliases).forEach(([key, [c1, c2]]) => {
+  if (!EFFECT_FACTORY[key]){
+    EFFECT_FACTORY[key] = _alias(key, c1, c2);
+  }
+});
+
+function pulseMarkers(time){
+  EVENTS.forEach((ev, i) => {
+    if (!ev._markerTop) return;
+    // Performance: skip pulsing markers in layers that aren't visible.
+    if (!LAYER_VISIBLE[ev.layer]) return;
+    const phase = time*0.0015 + i*0.4;
+    const s = 1 + Math.sin(phase) * 0.15;
+    ev._markerTop.scale.setScalar(s);
+    const mat = ev._markerTop.material;
+    mat.emissiveIntensity = 0.9 + Math.sin(phase)*0.4;
+  });
+}
+
+/* Compass rotation: read camera azimuth so the rose's needle always points
+   to true world-north regardless of camera rotation around the map. */
+const _compass = document.querySelector('#compass svg');
+function updateCompass(){
+  // azimuth = atan2(camera.x - target.x, camera.z - target.z)
+  const dx = camera.position.x - controls.target.x;
+  const dz = camera.position.z - controls.target.z;
+  const az = Math.atan2(dx, dz);                    // radians
+  const deg = az * 180/Math.PI;
+  if (_compass) _compass.style.transform = `rotate(${deg.toFixed(1)}deg)`;
+}
+
+function animate(time){
+  controls.update();
+  pulseMarkers(time);
+  updateLabels();
+  updateCityAndSeaLabels();
+  updateCompass();
+  if (typeof updateEffects === 'function'){
+    updateEffects(time);
+    _effectClock.last = time;
+  }
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+/* ===================== SEARCH ===================== */
+// Match an event by name (en + zh) or place (en + zh).
+function searchEvents(query){
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+  const out = [];
+  EVENTS.forEach((ev, i) => {
+    const en = (ev.name + ' ' + ev.place).toLowerCase();
+    const zhEv = EVENTS_ZH[ev.id] || {};
+    const zh = ((zhEv.name || '') + ' ' + (zhEv.place || '')).toLowerCase();
+    if (en.includes(q) || zh.includes(q)){
+      out.push(i);
+    }
+  });
+  return out.slice(0, 12);     // cap results
+}
+
+const searchInput   = document.getElementById('search-input');
+const searchResults = document.getElementById('search-results');
+function renderSearchResults(query){
+  const ids = searchEvents(query);
+  if (!query.trim()){
+    searchResults.classList.remove('show');
+    searchResults.innerHTML = '';
+    return;
+  }
+  if (ids.length === 0){
+    searchResults.classList.add('show');
+    searchResults.innerHTML = '<div class="empty">' +
+      (LANG === 'zh' ? '没有找到相关事件' : 'No matching events') + '</div>';
+    return;
+  }
+  searchResults.classList.add('show');
+  searchResults.innerHTML = ids.map(i => {
+    const ev = EVENTS[i];
+    const name  = txt(ev, 'name');
+    const place = txt(ev, 'place');
+    return `<div class="item" data-idx="${i}" data-layer="${ev.layer}">
+      <span class="layer-dot ${ev.layer}"></span>
+      <span class="name">${name}</span>
+      <span class="place">${place}</span>
+    </div>`;
+  }).join('');
+  searchResults.querySelectorAll('.item').forEach(node => {
+    node.addEventListener('click', () => {
+      const idx = +node.dataset.idx;
+      // make sure that event's layer is visible
+      const layer = node.dataset.layer;
+      if (!LAYER_VISIBLE[layer]){
+        LAYER_VISIBLE[layer] = true;
+        applyLayerVisibility();
+        saveSettings();
+      }
+      openPanel(idx);
+      searchInput.value = '';
+      renderSearchResults('');
+      searchInput.blur();
+    });
+  });
+}
+searchInput.addEventListener('input',  e => renderSearchResults(e.target.value));
+searchInput.addEventListener('focus',  e => renderSearchResults(e.target.value));
+document.addEventListener('click', e => {
+  if (!document.getElementById('search-box').contains(e.target)){
+    searchResults.classList.remove('show');
+  }
+});
+// Esc key to clear & blur
+searchInput.addEventListener('keydown', e => {
+  if (e.key === 'Escape'){ searchInput.value = ''; renderSearchResults(''); searchInput.blur(); }
+  if (e.key === 'Enter'){
+    const ids = searchEvents(searchInput.value);
+    if (ids.length){
+      const layer = EVENTS[ids[0]].layer;
+      if (!LAYER_VISIBLE[layer]){ LAYER_VISIBLE[layer] = true; applyLayerVisibility(); saveSettings(); }
+      openPanel(ids[0]);
+      searchInput.value = '';
+      renderSearchResults('');
+      searchInput.blur();
+    }
+  }
+});
+
+/* ===================== TIMELINE SCRUBBER ===================== */
+// Two-segment time axis: BC (-2400…-400)  +  AD (-5…+65).  We squeeze
+// these together with a "broken-bar" so the AD section gets ~50% of the
+// horizontal pixels even though it spans only 70 years.
+const TL_TRACK = document.getElementById('timeline-track');
+const TL_ERAS  = document.getElementById('timeline-eras');
+const TL_YEAR  = document.getElementById('tl-year');
+
+// Define two segments and their pixel-percentage shares
+const TL_SEG = [
+  { from:-2400, to:-400, share: 0.70 },   // OT  (70% of bar)
+  { from:   -5, to:   65, share: 0.30 },  // NT + Apostolic (30%)
+];
+function yearToPct(year){
+  if (year == null || isNaN(year)) return null;
+  if (year < TL_SEG[0].to + 50){
+    // First segment
+    const s = TL_SEG[0];
+    const t = clamp((year - s.from)/(s.to - s.from), 0, 1);
+    return t * s.share * 100;
+  } else {
+    const s = TL_SEG[1];
+    const t = clamp((year - s.from)/(s.to - s.from), 0, 1);
+    return (TL_SEG[0].share + t * s.share) * 100;
+  }
+}
+function pctToYear(pct){
+  // pct in 0..100
+  const f = clamp(pct/100, 0, 1);
+  if (f <= TL_SEG[0].share){
+    const s = TL_SEG[0];
+    const t = f / TL_SEG[0].share;
+    return Math.round(s.from + t*(s.to - s.from));
+  } else {
+    const s = TL_SEG[1];
+    const t = (f - TL_SEG[0].share)/TL_SEG[1].share;
+    return Math.round(s.from + t*(s.to - s.from));
+  }
+}
+
+// Render era labels under the bar
+function renderEras(){
+  TL_ERAS.innerHTML = '';
+  ERAS.forEach(era => {
+    const left  = yearToPct(era.from);
+    const right = yearToPct(era.to);
+    const w = right - left;
+    if (w < 1) return;
+    const div = document.createElement('div');
+    div.className = 'era';
+    div.style.flexBasis = w + '%';
+    div.style.flexShrink = '0';
+    div.dataset.en = era.en;
+    div.dataset.zh = era.zh;
+    div.textContent = LANG === 'zh' ? era.zh : era.en;
+    TL_ERAS.appendChild(div);
+  });
+}
+
+// Render event markers + tick marks on the bar
+function renderTimelineMarkers(){
+  // remove old
+  TL_TRACK.querySelectorAll('.marker, .tick').forEach(n => n.remove());
+  // century ticks
+  for (let y=-2400; y<=65; y += (y < -400 ? 200 : 20)){
+    const p = yearToPct(y);
+    if (p == null) continue;
+    const t = document.createElement('div');
+    t.className = 'tick';
+    t.style.left = p + '%';
+    TL_TRACK.appendChild(t);
+  }
+  // event markers
+  EVENTS.forEach((ev, i) => {
+    if (ev.year == null) return;
+    const p = yearToPct(ev.year);
+    if (p == null) return;
+    const m = document.createElement('div');
+    m.className = 'marker ' + ev.layer;
+    m.dataset.evIdx = i;
+    m.dataset.layer = ev.layer;
+    m.style.left = p + '%';
+    m.title = (LANG==='zh' ? (EVENTS_ZH[ev.id]||{}).name : ev.name) + ' — ' + formatYear(ev.year);
+    m.addEventListener('click', e => { e.stopPropagation(); openPanel(i); });
+    TL_TRACK.appendChild(m);
+  });
+  refreshTimelineMarkerVisibility();
+}
+function refreshTimelineMarkerVisibility(){
+  TL_TRACK.querySelectorAll('.marker').forEach(m => {
+    const layer = m.dataset.layer;
+    m.style.opacity = LAYER_VISIBLE[layer] ? '1' : '0.18';
+    m.style.pointerEvents = LAYER_VISIBLE[layer] ? 'auto' : 'none';
+  });
+}
+
+function formatYear(y){
+  if (y < 0) return Math.abs(y) + ' BC';
+  return 'AD ' + y;
+}
+
+// Scrubber (the draggable golden tab)
+const _scrubber = document.createElement('div');
+_scrubber.className = 'scrubber';
+_scrubber.style.left = '-100%';
+TL_TRACK.appendChild(_scrubber);
+
+let _tlYear = null;     // null = "all eras"
+const TIME_WINDOW = 60; // ± years considered "current"
+function setTimelineYear(year){
+  _tlYear = year;
+  if (year == null){
+    _scrubber.style.left = '-100%';
+    TL_YEAR.textContent = (LANG==='zh' ? '— 全部时代 —' : '— all eras —');
+  } else {
+    const p = yearToPct(year);
+    _scrubber.style.left = p + '%';
+    TL_YEAR.textContent = formatYear(year);
+  }
+  applyTimelineFilter();
+}
+function applyTimelineFilter(){
+  // Fade event markers (3D) + DOM labels: full opacity if within window of _tlYear,
+  // dim otherwise.  null = no filter, all visible.
+  EVENTS.forEach((ev, i) => {
+    let dim = false;
+    if (_tlYear != null && ev.year != null){
+      dim = Math.abs(ev.year - _tlYear) > TIME_WINDOW;
+    }
+    if (ev._markerTop)   ev._markerTop.material.opacity = dim ? 0.18 : 1;
+    if (ev._markerPillar) ev._markerPillar.material.opacity = dim ? 0.18 : 1;
+    if (ev._markerDisk)   ev._markerDisk.material.opacity   = dim ? 0.18 : 1;
+    const el = labelEls[i];
+    if (el) el.dataset.tlDim = dim ? '1' : '0';
+  });
+  // Also dim timeline marker dots that are out of window
+  TL_TRACK.querySelectorAll('.marker').forEach(m => {
+    m.style.opacity = '1';
+  });
+}
+function resetTimeline(){
+  setTimelineYear(null);
+  if (_tlPlaying) toggleTimelinePlay();
+}
+window.resetTimeline = resetTimeline;
+
+// Click anywhere on the track to jump
+TL_TRACK.addEventListener('click', e => {
+  const rect = TL_TRACK.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width * 100;
+  setTimelineYear(pctToYear(pct));
+});
+// Drag the scrubber
+let _dragging = false;
+_scrubber.addEventListener('mousedown', () => { _dragging = true; document.body.style.cursor='grabbing'; });
+window.addEventListener('mousemove', e => {
+  if (!_dragging) return;
+  const rect = TL_TRACK.getBoundingClientRect();
+  const pct = clamp((e.clientX - rect.left) / rect.width * 100, 0, 100);
+  setTimelineYear(pctToYear(pct));
+});
+window.addEventListener('mouseup', () => { _dragging = false; document.body.style.cursor=''; });
+
+// Play/pause: animate _tlYear from start to end of the timeline
+let _tlPlaying = false;
+let _tlPlayT  = 0;
+let _tlPlayRAF = null;
+function toggleTimelinePlay(){
+  _tlPlaying = !_tlPlaying;
+  const btn = document.getElementById('tl-play');
+  if (_tlPlaying){
+    btn.classList.add('playing');
+    btn.textContent = LANG==='zh' ? '⏸ 暂停' : '⏸ Pause';
+    if (_tlYear == null) setTimelineYear(-2400);
+    _tlPlayT = performance.now();
+    function tick(now){
+      if (!_tlPlaying){ return; }
+      const dt = (now - _tlPlayT) / 1000;
+      _tlPlayT = now;
+      // Advance year proportionally to current segment width
+      // (so OT and NT eras feel proportional in playback time)
+      const cur = _tlYear || -2400;
+      const speed = (cur < -400) ? 30 : 1.2;       // years per second
+      let next = cur + dt * speed;
+      if (next > 65){ next = -2400; }              // loop
+      setTimelineYear(Math.round(next));
+      _tlPlayRAF = requestAnimationFrame(tick);
+    }
+    _tlPlayRAF = requestAnimationFrame(tick);
+  } else {
+    btn.classList.remove('playing');
+    btn.textContent = LANG==='zh' ? '▶ 播放' : '▶ Play';
+    if (_tlPlayRAF) cancelAnimationFrame(_tlPlayRAF);
+  }
+}
+window.toggleTimelinePlay = toggleTimelinePlay;
+
+// Re-render era labels & marker tooltips on language change
+const _origSetLang = setLang;
+setLang = function(l){
+  _origSetLang(l);
+  renderEras();
+  renderTimelineMarkers();
+  // refresh play button label
+  const btn = document.getElementById('tl-play');
+  if (btn) btn.textContent = _tlPlaying
+    ? (LANG==='zh' ? '⏸ 暂停' : '⏸ Pause')
+    : (LANG==='zh' ? '▶ 播放' : '▶ Play');
+  // Refresh year display
+  setTimelineYear(_tlYear);
+};
+window.setLang = setLang;
+
+renderEras();
+// (markers can only be rendered after labelEls exist; done in BOOT)
+
+/* ===================== BOOT ===================== */
+// Restore saved language + layer visibility (or auto-detect browser language).
+const _saved = loadSettings();
+if (_saved){
+  if (_saved.lang === 'zh' || _saved.lang === 'en') LANG = _saved.lang;
+  if (_saved.layers){
+    LAYERS.forEach(l => { if (typeof _saved.layers[l] === 'boolean') LAYER_VISIBLE[l] = _saved.layers[l]; });
+    if (!LAYERS.some(l => LAYER_VISIBLE[l])) LAYER_VISIBLE.nt = true;
+  }
+} else {
+  // first visit — try to auto-detect browser language
+  const nav = (navigator.language || 'en').toLowerCase();
+  if (nav.startsWith('zh')) LANG = 'zh';
+}
+document.body.classList.toggle('zh', LANG === 'zh');
+document.getElementById('btn-en').classList.toggle('active', LANG === 'en');
+document.getElementById('btn-zh').classList.toggle('active', LANG === 'zh');
+// search input placeholder for current language
+const _ph = searchInput.getAttribute('data-placeholder-' + LANG);
+if (_ph) searchInput.placeholder = _ph;
+
+buildMap();
+applyLayerVisibility();   // apply restored / default layer visibility
+refreshLabels();          // populate event-label DOM in current language
+refreshCityAndSeaLabels();// populate city + sea label text in current language
+applyStaticTexts();       // ensure data-en/data-zh elements show correct text
+renderTimelineMarkers();  // place event dots on the timeline bar
+setTimeout(() => {
+  document.getElementById('loader').classList.add('hide');
+}, 400);
+animate(0);
+</script>
+
+</body>
+</html>
