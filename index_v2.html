@@ -954,171 +954,6 @@ body.zh .era-seg{font-family:'Noto Serif SC',serif;font-size:9px}
 .event-label[data-book-dim="1"]{opacity:0.10 !important;filter:saturate(0.2) !important}
 #title{transition:opacity .4s ease}
 
-/* ============== THEME TRACING PANEL (BibleProject-inspired) ============== */
-#theme-btn{
-  position:fixed;top:18px;left:50%;
-  transform:translateX(calc(-50% + 80px));
-  z-index:40;
-  background:rgba(24,16,8,0.80);
-  border:1px solid rgba(200,160,90,0.5);
-  border-radius:20px;
-  color:#f0d088;padding:7px 16px;cursor:pointer;
-  font-family:'Cinzel',serif;font-size:11px;letter-spacing:.14em;
-  backdrop-filter:blur(6px);box-shadow:0 4px 14px rgba(0,0,0,0.5);
-  transition:all .25s ease;display:flex;align-items:center;gap:7px;
-}
-#theme-btn:hover{background:rgba(40,28,14,0.92);border-color:rgba(240,200,120,0.7);color:#fff5cc}
-#theme-btn.active{background:rgba(240,200,120,0.25);border-color:rgba(240,200,120,0.9)}
-body.zh #theme-btn{font-family:'Noto Serif SC',serif;font-size:12px;letter-spacing:.04em}
-
-#theme-panel{
-  position:fixed;right:24px;top:60px;width:320px;max-height:75vh;overflow-y:auto;
-  z-index:35;
-  background:linear-gradient(180deg,rgba(28,18,8,0.97),rgba(18,12,6,0.97));
-  border:1px solid rgba(200,160,90,0.4);border-radius:6px;
-  padding:16px 18px 18px;
-  box-shadow:0 8px 36px rgba(0,0,0,0.7);backdrop-filter:blur(8px);
-  transition:opacity .3s ease,transform .3s ease;
-  opacity:0;transform:translateX(14px);pointer-events:none;
-}
-#theme-panel.show{opacity:1;transform:translateX(0);pointer-events:auto}
-#theme-panel::-webkit-scrollbar{width:4px}
-#theme-panel::-webkit-scrollbar-thumb{background:rgba(200,160,90,0.25);border-radius:2px}
-#theme-panel h3{
-  font-family:'Cinzel',serif;font-size:12px;letter-spacing:.16em;
-  color:#f0d088;margin-bottom:12px;padding-bottom:7px;
-  border-bottom:1px solid rgba(200,160,90,0.25);
-  display:flex;justify-content:space-between;align-items:center;
-}
-#theme-panel h3 button{background:none;border:none;color:#8a7050;cursor:pointer;font-size:15px;padding:0}
-#theme-panel h3 button:hover{color:#f0d088}
-body.zh #theme-panel h3{font-family:'Ma Shan Zheng',cursive;font-weight:400;font-size:16px}
-.theme-card{
-  background:rgba(255,235,180,0.03);border:1px solid rgba(200,160,90,0.22);
-  border-radius:5px;padding:10px 12px;margin-bottom:8px;cursor:pointer;
-  transition:all .2s ease;
-}
-.theme-card:hover{background:rgba(255,235,180,0.08);border-color:rgba(240,200,120,0.5)}
-.theme-card.active-theme{
-  background:rgba(240,200,120,0.12);border-color:rgba(240,200,120,0.65);
-  box-shadow:0 0 12px rgba(240,200,100,0.1);
-}
-.theme-card .tc-icon{font-size:18px;float:left;margin-right:8px;margin-top:1px}
-.theme-card .tc-name{
-  font-family:'Cinzel',serif;font-size:12px;letter-spacing:.10em;
-  color:#f0d088;margin-bottom:3px;
-}
-.theme-card .tc-desc{
-  font-family:'EB Garamond',serif;font-size:12px;
-  color:#b8a078;line-height:1.45;font-style:italic;
-}
-body.zh .theme-card .tc-name{font-family:'Noto Serif SC',serif;font-size:13px;letter-spacing:.04em}
-body.zh .theme-card .tc-desc{font-family:'ZCOOL XiaoWei',serif;font-style:normal;font-size:12px}
-.theme-stops{margin-top:8px;padding-top:6px;border-top:1px solid rgba(200,160,90,0.15)}
-.theme-stop{
-  display:flex;align-items:flex-start;gap:8px;padding:5px 0;cursor:pointer;
-  transition:all .15s ease;border-radius:3px;padding:4px 6px;margin:0 -6px;
-}
-.theme-stop:hover{background:rgba(255,235,180,0.06)}
-.theme-stop .ts-dot{
-  width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px;
-  border:2px solid rgba(200,160,90,0.6);background:rgba(20,14,8,0.7);
-  position:relative;
-}
-.theme-stop.ot-stop .ts-dot{border-color:#5080d0}
-.theme-stop.nt-stop .ts-dot{border-color:#f0b850}
-.theme-stop.paul-stop .ts-dot{border-color:#c84838}
-.theme-stop .ts-body{flex:1}
-.theme-stop .ts-ref{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.08em;color:#b89868}
-.theme-stop .ts-text{font-size:11.5px;color:#c8b888;line-height:1.4;
-  font-family:'Cormorant Garamond',serif}
-body.zh .theme-stop .ts-text{font-family:'Noto Serif SC',serif;font-size:11.5px}
-/* vertical connector line between stops */
-.theme-stops .theme-stop + .theme-stop{
-  position:relative;
-}
-.theme-stops .theme-stop + .theme-stop::before{
-  content:'';position:absolute;left:10px;top:-6px;width:2px;height:10px;
-  background:rgba(200,160,90,0.2);
-}
-
-/* ============== SCRIPTURE VERSE CARD (shareable-style) ============== */
-#verse-card{
-  position:fixed;inset:0;z-index:250;
-  background:rgba(8,6,4,0.90);display:none;
-  align-items:center;justify-content:center;
-  backdrop-filter:blur(10px);
-}
-#verse-card.show{display:flex}
-.vc-inner{
-  background:linear-gradient(145deg,#1a120a,#2a1c10);
-  border:2px solid rgba(200,160,90,0.5);
-  border-radius:8px;padding:40px 36px 32px;
-  max-width:440px;width:calc(100vw - 48px);
-  text-align:center;position:relative;
-  box-shadow:0 20px 60px rgba(0,0,0,0.8),inset 0 0 80px rgba(240,200,100,0.03);
-}
-.vc-inner .vc-cross{
-  font-size:28px;color:rgba(240,200,100,0.5);margin-bottom:18px;
-}
-.vc-inner .vc-text{
-  font-family:'Cormorant Garamond',serif;font-style:italic;
-  font-size:18px;line-height:1.65;color:#f0e4c8;margin-bottom:16px;
-  text-shadow:0 1px 4px rgba(0,0,0,0.5);
-}
-.vc-inner .vc-ref{
-  font-family:'Cinzel',serif;font-size:11px;letter-spacing:.18em;
-  color:#d8b878;margin-bottom:20px;
-}
-.vc-inner .vc-event{
-  font-family:'EB Garamond',serif;font-size:13px;
-  color:#a89060;margin-bottom:20px;font-style:italic;
-}
-.vc-close{
-  background:transparent;border:1px solid rgba(200,160,90,0.4);
-  color:#b89868;padding:6px 20px;border-radius:14px;cursor:pointer;
-  font-family:'Cinzel',serif;font-size:11px;letter-spacing:.10em;
-  transition:all .2s;
-}
-.vc-close:hover{background:rgba(240,200,120,0.12);color:#f0d088}
-body.zh .vc-inner .vc-text{font-family:'ZCOOL XiaoWei',serif;font-style:normal;font-size:17px;line-height:1.8}
-body.zh .vc-inner .vc-ref{font-family:'Noto Serif SC',serif}
-
-/* ============== "JESUS IN EVERY BOOK" badge in panel ============== */
-.jesus-in-book{
-  margin-top:10px;padding:8px 10px;
-  background:rgba(240,200,100,0.05);
-  border:1px solid rgba(240,200,100,0.18);border-radius:4px;
-  cursor:pointer;transition:all .2s;
-}
-.jesus-in-book:hover{background:rgba(240,200,100,0.10);border-color:rgba(240,200,100,0.35)}
-.jesus-in-book .jib-head{
-  font-family:'Cinzel',serif;font-size:9px;letter-spacing:.12em;
-  color:#d8b878;margin-bottom:4px;
-}
-.jesus-in-book .jib-text{
-  font-family:'Cormorant Garamond',serif;font-style:italic;
-  font-size:12px;color:#c8b888;line-height:1.4;
-}
-body.zh .jesus-in-book .jib-text{font-family:'ZCOOL XiaoWei',serif;font-style:normal}
-
-/* ============== VERSE BUTTON in panel ============== */
-.verse-card-btn{
-  margin-top:8px;background:transparent;
-  border:1px solid rgba(200,160,90,0.3);border-radius:14px;
-  color:#b89868;padding:4px 14px;cursor:pointer;
-  font-family:'Cinzel',serif;font-size:9px;letter-spacing:.10em;
-  transition:all .2s;display:inline-block;
-}
-.verse-card-btn:hover{background:rgba(240,200,120,0.10);color:#f0d088}
-
-/* ============== RESPONSIVE for new buttons ============== */
-@media(max-width:760px){
-  #theme-btn{display:none}
-  #theme-panel{display:none}
-  #verse-card .vc-inner{padding:28px 22px 22px}
-}
-
 </style>
 </head>
 <body>
@@ -1338,29 +1173,6 @@ body.zh .jesus-in-book .jib-text{font-family:'ZCOOL XiaoWei',serif;font-style:no
   <div class="era-seg exile" data-en="Exile" data-zh="被掳">Exile</div>
   <div class="era-seg christ" data-en="Christ" data-zh="基督">Christ</div>
   <div class="era-seg apostolic" data-en="Apostolic" data-zh="使徒">Apostolic</div>
-</div>
-
-
-<!-- Theme Tracing Button -->
-<button id="theme-btn" onclick="toggleThemePanel()">
-  <span data-en="🔗 Themes" data-zh="🔗 主题线索">🔗 Themes</span>
-</button>
-
-<!-- Theme Tracing Panel -->
-<div id="theme-panel">
-  <h3><span data-en="TRACE A THEME" data-zh="追踪主题线索">TRACE A THEME</span><button onclick="toggleThemePanel()">×</button></h3>
-  <div id="theme-content"></div>
-</div>
-
-<!-- Verse Card Overlay -->
-<div id="verse-card" onclick="if(event.target===this)closeVerseCard()">
-  <div class="vc-inner">
-    <div class="vc-cross">✝</div>
-    <div class="vc-text" id="vc-text"></div>
-    <div class="vc-ref" id="vc-ref"></div>
-    <div class="vc-event" id="vc-event"></div>
-    <button class="vc-close" onclick="closeVerseCard()" data-en="Close" data-zh="关闭">Close</button>
-  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -3255,11 +3067,6 @@ function openPanel(i){
   // Spawn the event-specific effect at the event's location
   if (typeof spawnEffect === 'function') spawnEffect(EVENTS[i]);
   flyTo(EVENTS[i]);
-  // Sync timeline to this event's year
-  const ev = EVENTS[i];
-  if (ev.year != null && typeof setTimelineYear === 'function'){
-    setTimelineYear(ev.year);
-  }
 }
 function renderPanel(){
   if (_activePanelIdx < 0) return;
@@ -3304,11 +3111,6 @@ function navPanel(dir){
   if (pos < 0) return;
   const next = sameLayer[(pos + dir + sameLayer.length) % sameLayer.length];
   openPanel(next.i);
-  // Sync timeline scrubber to the navigated event's year
-  const ev = next.e;
-  if (ev.year != null && typeof setTimelineYear === 'function'){
-    setTimelineYear(ev.year);
-  }
 }
 window.navPanel = navPanel;
 
@@ -3686,277 +3488,68 @@ EFFECT_FACTORY.cloud_ascending = (origin) => {
 EFFECT_FACTORY.cross_eclipse = (origin) => {
   const group = new THREE.Group();
   group.position.copy(origin);
-
-  // --- Helper: make a human figure on a cross ---
-  function makeCrucifiedFigure(x, scale, isJesus){
+  function makeCross(x){
     const g = new THREE.Group();
-    // Wooden cross (rougher, thicker)
-    const woodColor = 0x4a2a10;
-    const v = new THREE.Mesh(new THREE.BoxGeometry(0.12*scale, 1.1*scale, 0.12*scale),
-      new THREE.MeshBasicMaterial({ color:woodColor }));
-    v.position.y = 0.55*scale; g.add(v);
-    const h = new THREE.Mesh(new THREE.BoxGeometry(0.65*scale, 0.10*scale, 0.10*scale),
-      new THREE.MeshBasicMaterial({ color:woodColor }));
-    h.position.y = 0.82*scale; g.add(h);
-
-    // --- Human figure ---
-    const skinColor = isJesus ? 0xe8c8a0 : 0xd0b088;
-    const robeColor = isJesus ? 0xf5e8d8 : 0xa89070;
-    // Head
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.045*scale, 8, 6),
-      new THREE.MeshBasicMaterial({ color:skinColor }));
-    head.position.y = 0.92*scale; g.add(head);
-    // Crown of thorns (Jesus only)
-    if (isJesus){
-      const crown = new THREE.Mesh(
-        new THREE.TorusGeometry(0.052*scale, 0.008*scale, 4, 12),
-        new THREE.MeshBasicMaterial({ color:0x5a3a10 }));
-      crown.position.y = 0.95*scale;
-      crown.rotation.x = Math.PI/2;
-      g.add(crown);
-    }
-    // Torso
-    const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.035*scale, 0.04*scale, 0.22*scale, 5),
-      new THREE.MeshBasicMaterial({ color:robeColor }));
-    torso.position.y = 0.73*scale; g.add(torso);
-    // Arms (outstretched, nailed to crossbar)
-    const armMat = new THREE.MeshBasicMaterial({ color:skinColor });
-    const lArm = new THREE.Mesh(new THREE.CylinderGeometry(0.015*scale, 0.015*scale, 0.28*scale, 4), armMat);
-    lArm.rotation.z = Math.PI/2;
-    lArm.position.set(-0.20*scale, 0.82*scale, 0); g.add(lArm);
-    const rArm = new THREE.Mesh(new THREE.CylinderGeometry(0.015*scale, 0.015*scale, 0.28*scale, 4), armMat);
-    rArm.rotation.z = Math.PI/2;
-    rArm.position.set(0.20*scale, 0.82*scale, 0); g.add(rArm);
-    // Legs
-    const legMat = new THREE.MeshBasicMaterial({ color:robeColor });
-    const lLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.018*scale, 0.015*scale, 0.22*scale, 4), legMat);
-    lLeg.position.set(-0.025*scale, 0.50*scale, 0); g.add(lLeg);
-    const rLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.018*scale, 0.015*scale, 0.22*scale, 4), legMat);
-    rLeg.position.set(0.025*scale, 0.50*scale, 0); g.add(rLeg);
-    // Head bowed slightly (Jesus)
-    if (isJesus) head.position.z = 0.015*scale;
-
+    const v = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.95, 0.10),
+      new THREE.MeshBasicMaterial({ color:0x3a1f0a }));
+    v.position.y = 0.5; g.add(v);
+    const h = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.10, 0.10),
+      new THREE.MeshBasicMaterial({ color:0x3a1f0a }));
+    h.position.y = 0.78; g.add(h);
     g.position.x = x;
-    g._head = head;
     return g;
   }
-
-  // Three crosses — center is Jesus, larger
-  const crossL = makeCrucifiedFigure(-0.55, 0.85, false);
-  const crossC = makeCrucifiedFigure(0, 1.0, true);
-  const crossR = makeCrucifiedFigure(0.55, 0.85, false);
-  group.add(crossL, crossC, crossR);
-
-  // --- Dark sky (expanding cloud) ---
+  group.add(makeCross(-0.5), makeCross(0), makeCross(0.5));
+  // dark cloud above
   const dark = new THREE.Mesh(
-    new THREE.PlaneGeometry(4, 2.5),
-    new THREE.MeshBasicMaterial({ color:0x0a0404, transparent:true, opacity:0,
+    new THREE.PlaneGeometry(3, 1.5),
+    new THREE.MeshBasicMaterial({ color:0x100808, transparent:true, opacity:0,
       depthWrite:false, side:THREE.DoubleSide })
   );
-  dark.position.y = 2.2;
+  dark.position.y = 2.0;
   dark.rotation.x = -Math.PI/2.5;
   group.add(dark);
-
-  // --- Blood drops (small red particles falling) ---
-  const bloodCount = 12;
-  const bloodPos = new Float32Array(bloodCount * 3);
-  for (let i=0;i<bloodCount;i++){
-    bloodPos[i*3]   = (Math.random()-0.5)*0.15;
-    bloodPos[i*3+1] = 0.6 + Math.random()*0.3;
-    bloodPos[i*3+2] = 0.05 + Math.random()*0.05;
-  }
-  const bloodGeo = new THREE.BufferGeometry();
-  bloodGeo.setAttribute('position', new THREE.BufferAttribute(bloodPos, 3));
-  const blood = new THREE.Points(bloodGeo,
-    new THREE.PointsMaterial({ color:0x8a1010, size:0.04, transparent:true, opacity:0.8, depthWrite:false }));
-  group.add(blood);
-
-  // --- Resurrection glow (appears later) ---
-  const glow = makeGlowSprite(0xfff0b0, 2.0, 0);
-  glow.position.set(0, 1.0, 0);
+  // golden glow around center cross
+  const glow = makeGlowSprite(0xffd870, 1.6, 0);
+  glow.position.set(0, 0.9, 0);
   group.add(glow);
-
-  // --- Ground crack (earthquake line) ---
-  const crack = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.06, 2),
-    new THREE.MeshBasicMaterial({ color:0x2a1a08, transparent:true, opacity:0, depthWrite:false }));
-  crack.rotation.x = -Math.PI/2;
-  crack.position.y = 0.02;
-  group.add(crack);
-
-  // --- Mourners at the foot of the cross ---
-  function makeMourner(x, z){
-    const m = new THREE.Group();
-    const h = new THREE.Mesh(new THREE.SphereGeometry(0.03, 6, 5),
-      new THREE.MeshBasicMaterial({ color:0xd0b080 }));
-    h.position.y = 0.18; m.add(h);
-    const b = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.15, 5),
-      new THREE.MeshBasicMaterial({ color:0x8a7050 }));
-    b.position.y = 0.08; m.add(b);
-    m.position.set(x, 0, z);
-    return m;
-  }
-  group.add(makeMourner(-0.12, 0.3), makeMourner(0.10, 0.35), makeMourner(0.02, 0.4));
-
   return {
-    group, dark, glow, blood, crack,
+    group, dark, glow,
     update(dt, t){
-      // Phase 1 (0-3s): sky darkens, blood drips
-      dark.material.opacity = clamp(t/3, 0, 0.88) * (t<7 ? 1 : Math.max(0, 1-(t-7)/3));
-      // Blood particles drip
-      if (t > 0.5){
-        const a = blood.geometry.attributes.position.array;
-        for (let i=0;i<bloodCount;i++){
-          a[i*3+1] -= dt * 0.25;
-          if (a[i*3+1] < 0.01){
-            a[i*3+1] = 0.5 + Math.random()*0.3;
-            a[i*3]   = (Math.random()-0.5)*0.12;
-          }
-        }
-        blood.geometry.attributes.position.needsUpdate = true;
-      }
-      // Phase 2 (3s): earthquake crack
-      crack.material.opacity = t > 3 ? clamp((t-3)/0.5, 0, 0.7) : 0;
-      crack.scale.x = t > 3 ? 1 + Math.sin((t-3)*8)*0.3 : 1;
-      // Phase 3 (5s+): resurrection glow
-      glow.material.opacity = t > 5 ? clamp((t-5)/2, 0, 0.95) : 0;
-      if (t > 5) glow.scale.setScalar(1 + (t-5)*0.15);
+      // 0..3s: darkening; 3..6s: glow
+      dark.material.opacity = clamp(t/3, 0, 0.85) * (t<6 ? 1 : Math.max(0, 1 - (t-6)/2));
+      glow.material.opacity = t > 4 ? clamp((t-4)/1.5, 0, 0.9) : 0;
     }
   };
 };
 
-/* ---------- SEA PARTING (Red Sea, Jordan): walls of water + walking Israelites ---------- */
+/* ---------- SEA PARTING (Red Sea, Jordan): wall of water on each side ---------- */
 EFFECT_FACTORY.sea_parting = (origin) => {
   const group = new THREE.Group();
   group.position.copy(origin);
-
-  // --- Water walls with foam particles ---
-  function makeWaterWall(x){
-    const wall = new THREE.Group();
-    // Main transparent water body
-    const body = new THREE.Mesh(new THREE.BoxGeometry(0.35, 1.8, 3.5),
-      new THREE.MeshBasicMaterial({ color:0x2870b0, transparent:true, opacity:0.55,
+  function makeWall(x){
+    const g = new THREE.Mesh(new THREE.BoxGeometry(0.30, 1.5, 3),
+      new THREE.MeshBasicMaterial({ color:0x3a82c8, transparent:true, opacity:0.7,
         depthWrite:false, side:THREE.DoubleSide }));
-    body.position.set(0, 0.9, 0);
-    wall.add(body);
-    // Foam spray particles along the inner edge
-    const foamCount = 40;
-    const foamPos = new Float32Array(foamCount * 3);
-    for (let i=0;i<foamCount;i++){
-      foamPos[i*3]   = (Math.random()-0.5) * 0.15;
-      foamPos[i*3+1] = Math.random() * 1.8;
-      foamPos[i*3+2] = (Math.random()-0.5) * 3.5;
-    }
-    const foamGeo = new THREE.BufferGeometry();
-    foamGeo.setAttribute('position', new THREE.BufferAttribute(foamPos, 3));
-    const foam = new THREE.Points(foamGeo,
-      new THREE.PointsMaterial({ color:0xc8e8ff, size:0.08, transparent:true, opacity:0.75, depthWrite:false }));
-    wall.add(foam);
-    wall.position.x = x;
-    wall._body = body; wall._foam = foam;
-    return wall;
+    g.position.set(x, 0.75, 0);
+    return g;
   }
-  const wL = makeWaterWall(-0.6); group.add(wL);
-  const wR = makeWaterWall( 0.6); group.add(wR);
-
-  // --- Dry sandy path ---
-  const path = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 3.5),
-    new THREE.MeshBasicMaterial({ color:0xc8a868, transparent:true, opacity:0.75, depthWrite:false }));
-  path.rotation.x = -Math.PI/2; path.position.y = 0.03;
+  const wL = makeWall(-0.6); group.add(wL);
+  const wR = makeWall( 0.6); group.add(wR);
+  // dry path glow
+  const path = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 3),
+    new THREE.MeshBasicMaterial({ color:0xc8a868, transparent:true, opacity:0.7, depthWrite:false }));
+  path.rotation.x = -Math.PI/2; path.position.y = 0.05;
   group.add(path);
-
-  // --- Walking Israelites (simple humanoid figures) ---
-  function makeHumanFigure(color, scale){
-    const fig = new THREE.Group();
-    // Head
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.04*scale, 6, 6),
-      new THREE.MeshBasicMaterial({ color:color }));
-    head.position.y = 0.32 * scale;
-    fig.add(head);
-    // Body
-    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.025*scale, 0.035*scale, 0.18*scale, 5),
-      new THREE.MeshBasicMaterial({ color:color }));
-    body.position.y = 0.20 * scale;
-    fig.add(body);
-    // Robe / skirt
-    const robe = new THREE.Mesh(new THREE.ConeGeometry(0.055*scale, 0.12*scale, 5),
-      new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(0.8) }));
-    robe.position.y = 0.08 * scale;
-    fig.add(robe);
-    return fig;
-  }
-
-  const people = [];
-  const peopleCount = 18;
-  const robeColors = [0xf0e8d0, 0xd8c8a0, 0xb89868, 0xe0d0b0, 0xc8b888, 0xa08860, 0xd0c098];
-  for (let i=0; i<peopleCount; i++){
-    const c = robeColors[i % robeColors.length];
-    const scale = 0.7 + Math.random() * 0.5;
-    const fig = makeHumanFigure(c, scale);
-    const row = Math.floor(i / 3);
-    const col = (i % 3) - 1;
-    fig.position.set(col * 0.18, 0.01, -1.5 + row * 0.4 + Math.random()*0.15);
-    fig._baseZ = fig.position.z;
-    fig._speed = 0.15 + Math.random() * 0.1;
-    fig._swayOff = Math.random() * Math.PI * 2;
-    people.push(fig);
-    group.add(fig);
-  }
-
-  // --- Moses figure at front (taller, arms raised) ---
-  const moses = new THREE.Group();
-  const mosesBody = makeHumanFigure(0xf5e8c8, 1.3);
-  moses.add(mosesBody);
-  // Staff (extended arm)
-  const staff = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.5, 4),
-    new THREE.MeshBasicMaterial({ color:0x6a4a20 }));
-  staff.position.set(0.08, 0.35, 0);
-  staff.rotation.z = -0.6;
-  moses.add(staff);
-  moses.position.set(0, 0.01, -1.8);
-  group.add(moses);
-
-  // --- Pillar of cloud/fire above ---
-  const pillar = makeGlowSprite(0xfff0c0, 1.2, 0.6);
-  pillar.position.set(0, 2.5, -1.8);
-  group.add(pillar);
-
   return {
-    group, wL, wR, people, moses, pillar,
+    group, wL, wR,
     update(dt, t){
-      // Phase 1 (0-2s): waters part; Phase 2 (2s+): people walk through
-      const sep = clamp(t * 0.35, 0, 0.75);
-      wL.position.x = -0.3 - sep;
-      wR.position.x =  0.3 + sep;
-      // Water wave animation
-      const wave = Math.sin(t*3)*0.06;
-      wL._body.scale.y = 1 + wave; wR._body.scale.y = 1 - wave;
-      // Foam particles drift upward
-      [wL, wR].forEach(w => {
-        const a = w._foam.geometry.attributes.position.array;
-        for (let i=0;i<a.length/3;i++){
-          a[i*3+1] += dt * (0.3 + Math.sin(i)*0.2);
-          if (a[i*3+1] > 1.8) a[i*3+1] = 0;
-        }
-        w._foam.geometry.attributes.position.needsUpdate = true;
-      });
-      // People walk forward after phase 1
-      if (t > 1.5){
-        people.forEach((p, i) => {
-          p.position.z = p._baseZ + (t - 1.5) * p._speed;
-          // Walking sway
-          p.rotation.z = Math.sin(t * 4 + p._swayOff) * 0.06;
-          p.children.forEach(c => {
-            if (c.position.y < 0.1) c.position.x = Math.sin(t*6 + p._swayOff) * 0.01;
-          });
-          if (p.position.z > 2) p.position.z = p._baseZ;
-        });
-        moses.position.z = -1.8 + (t - 1.5) * 0.12;
-        moses.children[1].rotation.z = -0.6 + Math.sin(t*2)*0.15; // staff waves
-      }
-      // Pillar of fire pulses
-      pillar.material.opacity = 0.5 + Math.sin(t*3)*0.2;
-      pillar.position.z = moses.position.z;
+      const sep = clamp(t * 0.4, 0, 0.6);
+      wL.position.x = -0.4 - sep;
+      wR.position.x =  0.4 + sep;
+      const wave = Math.sin(t*4)*0.05;
+      wL.scale.y = 1 + wave;
+      wR.scale.y = 1 - wave;
     }
   };
 };
@@ -4476,45 +4069,17 @@ function toggleTimelinePlay(){
     btn.textContent = LANG==='zh' ? '⏸ 暂停' : '⏸ Pause';
     if (_tlYear == null) setTimelineYear(-2400);
     _tlPlayT = performance.now();
-    // Use a floating-point accumulator so sub-integer advances don't get lost
-    let _tlPlayCur = (_tlYear != null) ? _tlYear : -2400;
     function tick(now){
       if (!_tlPlaying){ return; }
       const dt = (now - _tlPlayT) / 1000;
       _tlPlayT = now;
-      // OT segment: -2400 to -350 (fast); NT+Acts: -5 to 65 (slower)
-      const inOT = _tlPlayCur < -350;
-      const speed = inOT ? 120 : 4;  // years per second (faster for smooth feel)
-      _tlPlayCur += dt * speed;
-      // Jump the inter-testament gap (-350 → -5)
-      if (_tlPlayCur > -350 && _tlPlayCur < -5){
-        _tlPlayCur = -5;
-        // Auto-enable NT layer so user sees NT events
-        if (!LAYER_VISIBLE.nt){
-          LAYER_VISIBLE.nt = true;
-          const b = document.getElementById('btn-nt');
-          if (b) b.classList.add('active');
-          applyLayerVisibility();
-        }
-      }
-      // Auto-enable Paul/Acts layer when entering that range
-      if (_tlPlayCur >= 30 && !LAYER_VISIBLE.paul){
-        LAYER_VISIBLE.paul = true;
-        const b = document.getElementById('btn-paul');
-        if (b) b.classList.add('active');
-        applyLayerVisibility();
-      }
-      if (_tlPlayCur > 70){
-        _tlPlayCur = -2400;  // loop back
-        // Auto-enable OT layer for the loop
-        if (!LAYER_VISIBLE.ot){
-          LAYER_VISIBLE.ot = true;
-          const b = document.getElementById('btn-ot');
-          if (b) b.classList.add('active');
-          applyLayerVisibility();
-        }
-      }
-      setTimelineYear(Math.round(_tlPlayCur));
+      // Advance year proportionally to current segment width
+      // (so OT and NT eras feel proportional in playback time)
+      const cur = _tlYear || -2400;
+      const speed = (cur < -400) ? 30 : 1.2;       // years per second
+      let next = cur + dt * speed;
+      if (next > 65){ next = -2400; }              // loop
+      setTimelineYear(Math.round(next));
       _tlPlayRAF = requestAnimationFrame(tick);
     }
     _tlPlayRAF = requestAnimationFrame(tick);
@@ -5189,321 +4754,6 @@ window.addEventListener('keydown', e => {
     if (sb) sb.style.animation = 'loaderGlow 2s ease-in-out 2';
   }, 1500);
 })();
-
-
-/* ===================================================================
-   BIBLEPROJECT-INSPIRED FEATURES (v3)
-   =================================================================== */
-
-/* ===== THEME TRACING — trace a theme from Genesis to Revelation ===== */
-const THEMES = [
-  {
-    id:'covenant', icon:'📜',
-    name_en:'Covenant', name_zh:'盟约',
-    desc_en:'God\u2019s binding promises — from Noah\u2019s rainbow to the new covenant in Jesus\u2019 blood.',
-    desc_zh:'神的盟约——从挪亚的彩虹到耶稣宝血中的新约。',
-    stops:[
-      {ref:'Genesis 9:13', ref_zh:'创 9:13', text_en:'God sets the rainbow as a sign of His covenant with Noah.', text_zh:'神以彩虹作为与挪亚立约的记号。', layer:'ot', event:'ot-ararat'},
-      {ref:'Genesis 15:18', ref_zh:'创 15:18', text_en:'God makes a covenant with Abraham — his offspring will inherit the land.', text_zh:'神与亚伯拉罕立约——他的后裔必承受这地。', layer:'ot', event:'ot-ur'},
-      {ref:'Exodus 19\u201324', ref_zh:'出 19\u201324', text_en:'At Sinai God establishes the Mosaic covenant: "I will be your God."', text_zh:'在西奈山，神设立摩西之约："我要作你们的神。"', layer:'ot', event:'ot-sinai'},
-      {ref:'2 Samuel 7:16', ref_zh:'撒下 7:16', text_en:'God promises David an eternal throne — fulfilled in Jesus.', text_zh:'神应许大卫永远的国位——在耶稣里成全。', layer:'ot', event:'ot-davidcity'},
-      {ref:'Luke 22:20', ref_zh:'路 22:20', text_en:'"This cup is the new covenant in my blood, poured out for you."', text_zh:'"这杯是用我血所立的新约，是为你们流出来的。"', layer:'nt', event:'lastsupper'},
-    ]
-  },
-  {
-    id:'sacrifice', icon:'🐑',
-    name_en:'Sacrifice & the Lamb', name_zh:'献祭与羔羊',
-    desc_en:'From Abel\u2019s offering to the Lamb of God who takes away the sin of the world.',
-    desc_zh:'从亚伯的供物到除去世人罪孽的神羔羊。',
-    stops:[
-      {ref:'Genesis 22:8', ref_zh:'创 22:8', text_en:'"God will provide himself the lamb" — Abraham on Mount Moriah.', text_zh:'"神必自己预备作燔祭的羊羔"——亚伯拉罕在摩利亚山。', layer:'ot', event:'ot-moriah'},
-      {ref:'Exodus 12:3\u20137', ref_zh:'出 12:3\u20137', text_en:'The Passover lamb\u2019s blood on the doorposts saves Israel from death.', text_zh:'逾越节羔羊的血涂在门框上，拯救以色列免于死亡。', layer:'ot', event:'ot-redsea'},
-      {ref:'Isaiah 53:7', ref_zh:'赛 53:7', text_en:'"He was led like a lamb to the slaughter" — the Suffering Servant.', text_zh:'"他像羊羔被牵到宰杀之地"——受苦的仆人。', layer:'ot', event:null},
-      {ref:'John 1:29', ref_zh:'约 1:29', text_en:'"Behold, the Lamb of God, who takes away the sin of the world!"', text_zh:'"看哪，神的羔羊，除去世人罪孽的！"', layer:'nt', event:'baptism'},
-      {ref:'John 19:30', ref_zh:'约 19:30', text_en:'"It is finished" — Jesus, the final sacrifice.', text_zh:'"成了！"——耶稣，最终的祭物。', layer:'nt', event:'crucifixion'},
-    ]
-  },
-  {
-    id:'temple', icon:'🏛',
-    name_en:'Temple & God\u2019s Dwelling', name_zh:'圣殿与神的同在',
-    desc_en:'From the Tabernacle to Jesus declaring "Destroy this temple and I will raise it in three days."',
-    desc_zh:'从会幕到耶稣宣告"你们拆毁这殿，我三日内要再建立起来。"',
-    stops:[
-      {ref:'Exodus 40:34', ref_zh:'出 40:34', text_en:'God\u2019s glory fills the Tabernacle in the wilderness.', text_zh:'神的荣光充满旷野中的会幕。', layer:'ot', event:'ot-sinai'},
-      {ref:'1 Kings 8:11', ref_zh:'王上 8:11', text_en:'Solomon dedicates the Temple; the cloud of glory fills it.', text_zh:'所罗门献殿；荣耀的云彩充满圣殿。', layer:'ot', event:'ot-temple'},
-      {ref:'2 Kings 25:9', ref_zh:'王下 25:9', text_en:'Babylon destroys the Temple — God\u2019s presence departs.', text_zh:'巴比伦毁灭圣殿——神的同在离去。', layer:'ot', event:'ot-fallj'},
-      {ref:'John 2:19\u201321', ref_zh:'约 2:19\u201321', text_en:'"Destroy this temple and I will raise it in three days" — Jesus\u2019 body is the true Temple.', text_zh:'"你们拆毁这殿，我三日内要再建立起来"——耶稣的身体是真正的圣殿。', layer:'nt', event:'entry'},
-      {ref:'Acts 2:1\u20134', ref_zh:'徒 2:1\u20134', text_en:'At Pentecost the Spirit fills believers — they become God\u2019s temple.', text_zh:'五旬节圣灵充满信徒——他们成为神的殿。', layer:'paul', event:'paul-pentecost'},
-    ]
-  },
-  {
-    id:'kingdom', icon:'👑',
-    name_en:'The Kingdom of God', name_zh:'神的国度',
-    desc_en:'From Eden\u2019s garden to "The kingdom of God is at hand" and the new creation.',
-    desc_zh:'从伊甸园到"神的国近了"和新创造。',
-    stops:[
-      {ref:'Genesis 1:28', ref_zh:'创 1:28', text_en:'God gives Adam dominion — humanity as image-bearing rulers.', text_zh:'神赐亚当管理权——人类作为照着神形象的管理者。', layer:'ot', event:null},
-      {ref:'1 Samuel 16:13', ref_zh:'撒上 16:13', text_en:'David anointed king — a man after God\u2019s own heart.', text_zh:'大卫被膏立为王——合神心意的人。', layer:'ot', event:'ot-davidanointed'},
-      {ref:'Mark 1:15', ref_zh:'可 1:15', text_en:'"The kingdom of God is at hand; repent and believe."', text_zh:'"神的国近了，你们当悔改，信福音。"', layer:'nt', event:'baptism'},
-      {ref:'Matthew 5\u20137', ref_zh:'太 5\u20137', text_en:'The Sermon on the Mount — the constitution of the Kingdom.', text_zh:'登山宝训——天国的宪章。', layer:'nt', event:'sermon'},
-      {ref:'Revelation 11:15', ref_zh:'启 11:15', text_en:'"The kingdom of the world has become the kingdom of our Lord and of His Christ."', text_zh:'"世上的国成了我主和主基督的国。"', layer:'nt', event:'ascension'},
-    ]
-  },
-  {
-    id:'exile', icon:'🚶',
-    name_en:'Exile & Homecoming', name_zh:'流亡与归家',
-    desc_en:'The pattern of exile and return — from Eden to Babylon to the Prodigal Son.',
-    desc_zh:'流亡与归来的范式——从伊甸到巴比伦到浪子回头。',
-    stops:[
-      {ref:'Genesis 3:23\u201324', ref_zh:'创 3:23\u201324', text_en:'Adam and Eve are exiled from Eden — the first exile.', text_zh:'亚当夏娃被逐出伊甸——第一次流放。', layer:'ot', event:null},
-      {ref:'2 Kings 17:6', ref_zh:'王下 17:6', text_en:'Israel is exiled to Assyria — the northern kingdom falls.', text_zh:'以色列被掳到亚述——北国灭亡。', layer:'ot', event:'ot-fall'},
-      {ref:'2 Kings 25:21', ref_zh:'王下 25:21', text_en:'Judah is exiled to Babylon — "By the rivers of Babylon we wept."', text_zh:'犹大被掳到巴比伦——"我们曾在巴比伦的河边坐下，一追想锡安就哭了。"', layer:'ot', event:'ot-fallj'},
-      {ref:'Ezra 1:1\u20133', ref_zh:'拉 1:1\u20133', text_en:'Cyrus decrees the return — God brings His people home.', text_zh:'居鲁士下令归回——神带领他的子民回家。', layer:'ot', event:'ot-return'},
-      {ref:'Luke 15:20', ref_zh:'路 15:20', text_en:'"While he was still a long way off, his father saw him and ran to him" — the ultimate homecoming.', text_zh:'"相离还远，他父亲看见就动了慈心，跑去抱着他的颈项"——终极的归家。', layer:'nt', event:null},
-    ]
-  },
-  {
-    id:'water', icon:'💧',
-    name_en:'Water & New Life', name_zh:'水与新生',
-    desc_en:'Water as judgment and salvation — the flood, the Red Sea, the Jordan, and baptism.',
-    desc_zh:'水作为审判与救恩——洪水、红海、约旦河与洗礼。',
-    stops:[
-      {ref:'Genesis 7\u20138', ref_zh:'创 7\u20138', text_en:'The Flood — water as judgment and new beginning through the ark.', text_zh:'洪水——水作为审判，方舟带来新的开始。', layer:'ot', event:'ot-ararat'},
-      {ref:'Exodus 14', ref_zh:'出 14', text_en:'Israel passes through the Red Sea — from slavery to freedom.', text_zh:'以色列过红海——从奴役到自由。', layer:'ot', event:'ot-redsea'},
-      {ref:'Joshua 3', ref_zh:'书 3', text_en:'Israel crosses the Jordan into the Promised Land.', text_zh:'以色列过约旦河进入应许之地。', layer:'ot', event:'ot-jordan'},
-      {ref:'Matthew 3:16', ref_zh:'太 3:16', text_en:'Jesus is baptized in the Jordan — heaven opens and the Spirit descends.', text_zh:'耶稣在约旦河受洗——天开了，圣灵降临。', layer:'nt', event:'baptism'},
-      {ref:'John 4:14', ref_zh:'约 4:14', text_en:'"The water I give will become a spring of water welling up to eternal life."', text_zh:'"我所赐的水要在他里头成为泉源，直涌到永生。"', layer:'nt', event:'samaritan'},
-    ]
-  },
-];
-
-let _activeTheme = null;
-function toggleThemePanel(){
-  const p = document.getElementById('theme-panel');
-  p.classList.toggle('show');
-  document.getElementById('theme-btn').classList.toggle('active');
-  if (p.classList.contains('show') && !p.querySelector('.theme-card')) renderThemes();
-}
-window.toggleThemePanel = toggleThemePanel;
-
-function renderThemes(){
-  const root = document.getElementById('theme-content');
-  root.innerHTML = '';
-  const L = LANG === 'zh' ? 'zh' : 'en';
-  THEMES.forEach(th => {
-    const card = document.createElement('div');
-    card.className = 'theme-card';
-    card.dataset.themeId = th.id;
-    card.innerHTML =
-      '<span class="tc-icon">' + th.icon + '</span>' +
-      '<div class="tc-name">' + th['name_' + L] + '</div>' +
-      '<div class="tc-desc">' + th['desc_' + L] + '</div>';
-    card.addEventListener('click', () => activateTheme(th));
-    root.appendChild(card);
-  });
-}
-
-function activateTheme(th){
-  const L = LANG === 'zh' ? 'zh' : 'en';
-  const wasActive = _activeTheme === th;
-  // deactivate all
-  _activeTheme = null;
-  document.querySelectorAll('.theme-card').forEach(c => {
-    c.classList.remove('active-theme');
-    const stopsDiv = c.querySelector('.theme-stops');
-    if (stopsDiv) stopsDiv.remove();
-  });
-  // clear marker dims
-  EVENTS.forEach((ev, i) => { if (labelEls[i]) labelEls[i].dataset.bookDim = '0'; });
-
-  if (wasActive) return;
-
-  _activeTheme = th;
-  const card = document.querySelector('.theme-card[data-theme-id="' + th.id + '"]');
-  card.classList.add('active-theme');
-
-  // Enable all required layers
-  const neededLayers = new Set(th.stops.filter(s => s.event).map(s => s.layer));
-  neededLayers.forEach(l => {
-    if (!LAYER_VISIBLE[l]){
-      LAYER_VISIBLE[l] = true;
-      const btn = document.getElementById('btn-' + l);
-      if (btn) btn.classList.add('active');
-    }
-  });
-  applyLayerVisibility();
-
-  // Dim all markers except those in the theme
-  const themeEvents = new Set(th.stops.map(s => s.event).filter(Boolean));
-  EVENTS.forEach((ev, i) => {
-    if (labelEls[i]) labelEls[i].dataset.bookDim = themeEvents.has(ev.id) ? '0' : '1';
-  });
-
-  // Render stops
-  const stopsDiv = document.createElement('div');
-  stopsDiv.className = 'theme-stops';
-  th.stops.forEach(stop => {
-    const s = document.createElement('div');
-    s.className = 'theme-stop ' + stop.layer + '-stop';
-    const refText = (L === 'zh' && stop.ref_zh) ? stop.ref_zh : stop.ref;
-    const bodyText = (L === 'zh') ? stop.text_zh : stop.text_en;
-    s.innerHTML = '<div class="ts-dot"></div><div class="ts-body">' +
-                  '<div class="ts-ref">' + refText + '</div>' +
-                  '<div class="ts-text">' + bodyText + '</div></div>';
-    if (stop.event){
-      s.style.cursor = 'pointer';
-      s.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const idx = EVENTS.findIndex(ev => ev.id === stop.event);
-        if (idx >= 0) openPanel(idx);
-      });
-    }
-    stopsDiv.appendChild(s);
-  });
-  card.appendChild(stopsDiv);
-}
-
-/* ===== VERSE CARD — beautiful shareable scripture card ===== */
-function showVerseCard(ev){
-  const L = LANG === 'zh' ? 'zh' : 'en';
-  document.getElementById('vc-text').textContent = txt(ev, 'scripture');
-  document.getElementById('vc-ref').textContent = ev.ref;
-  document.getElementById('vc-event').textContent = txt(ev, 'name') + ' \u2014 ' + txt(ev, 'place');
-  document.getElementById('verse-card').classList.add('show');
-}
-function closeVerseCard(){
-  document.getElementById('verse-card').classList.remove('show');
-}
-window.showVerseCard = showVerseCard;
-window.closeVerseCard = closeVerseCard;
-
-/* ===== "JESUS IN EVERY BOOK" data ===== */
-const JESUS_IN_BOOK = {
-  'Genesis': {en:'The Promised Seed of the woman (Gen 3:15) who will crush the serpent\u2019s head.', zh:'女人的后裔（创3:15），要伤蛇的头。'},
-  'Exodus': {en:'The Passover Lamb whose blood sets the captives free.', zh:'逾越节的羔羊，他的血使被掳的得释放。'},
-  'Leviticus': {en:'The Great High Priest who offers Himself as the perfect sacrifice.', zh:'大祭司，将自己献上为完美的祭物。'},
-  'Numbers': {en:'The Star coming out of Jacob (Num 24:17).', zh:'从雅各而出的星（民24:17）。'},
-  'Deuteronomy': {en:'The Prophet like Moses whom God will raise up (Deut 18:15).', zh:'神要兴起的那位像摩西的先知（申18:15）。'},
-  'Joshua': {en:'The Captain of our salvation who leads us into the Promised Land.', zh:'我们救恩的元帅，领我们进入应许之地。'},
-  '1 Samuel': {en:'The anointed King after God\u2019s own heart.', zh:'合神心意的受膏君王。'},
-  '2 Samuel': {en:'The Son of David whose throne endures forever.', zh:'大卫的子孙，他的国位永远坚立。'},
-  '1 Kings': {en:'The greater Solomon \u2014 King of wisdom and peace.', zh:'比所罗门更大的——智慧与和平之王。'},
-  '2 Kings': {en:'The Healer and miracle-worker greater than Elisha.', zh:'比以利沙更大的医治者和行神迹者。'},
-  'Psalms': {en:'The Blessed Man, the Good Shepherd, the King enthroned on Zion.', zh:'有福的人，好牧人，坐在锡安宝座上的王。'},
-  'Isaiah': {en:'The Suffering Servant and Prince of Peace (Isa 9:6, 53).', zh:'受苦的仆人，和平的君（赛9:6，53）。'},
-  'Jeremiah': {en:'The Righteous Branch of David (Jer 23:5).', zh:'大卫公义的苗裔（耶23:5）。'},
-  'Ezekiel': {en:'The Good Shepherd who gathers the scattered flock (Ezek 34:23).', zh:'招聚分散羊群的好牧人（结34:23）。'},
-  'Daniel': {en:'The Son of Man coming on the clouds of heaven (Dan 7:13).', zh:'驾着天云而来的人子（但7:13）。'},
-  'Jonah': {en:'The One who was three days in the heart of the earth (Matt 12:40).', zh:'在地里头三日三夜的那位（太12:40）。'},
-  'Micah': {en:'The Ruler from Bethlehem whose origins are from of old (Mic 5:2).', zh:'从伯利恒出来的掌权者，他的根源从亘古（弥5:2）。'},
-  'Zechariah': {en:'The pierced One upon whom they will look and mourn (Zech 12:10).', zh:'他们必仰望那被扎的人（亚12:10）。'},
-  'Malachi': {en:'The Sun of Righteousness rising with healing in His wings (Mal 4:2).', zh:'公义的日头，其光线有医治之能（玛4:2）。'},
-  'Matthew': {en:'The Messiah, King of the Jews, fulfiller of all Old Testament prophecy.', zh:'弥赛亚，犹太人的王，旧约一切预言的成全者。'},
-  'Mark': {en:'The Suffering Servant who came not to be served but to serve.', zh:'受苦的仆人，来不是要受人服侍，乃是要服侍人。'},
-  'Luke': {en:'The Son of Man, friend of sinners, seeker of the lost.', zh:'人子，罪人的朋友，寻找失丧者的。'},
-  'John': {en:'The Word made flesh, the I AM, the Light of the World.', zh:'道成肉身，我是，世界的光。'},
-  'Acts': {en:'The Ascended Lord who pours out His Spirit on all flesh.', zh:'升天的主，将圣灵浇灌凡有血气的。'},
-  'Romans': {en:'Our Justification \u2014 the One who makes the ungodly righteous.', zh:'我们的称义——使不敬虔之人成为义的那位。'},
-  '1-2 Corinthians': {en:'The Power and Wisdom of God, the firstfruits of resurrection.', zh:'神的能力和智慧，复活的初熟果子。'},
-  'Galatians': {en:'Our Freedom \u2014 the One who set us free from the law of sin and death.', zh:'我们的自由——释放我们脱离罪和死的律的那位。'},
-  'Ephesians': {en:'The Head of the Church, in whom all things hold together.', zh:'教会的头，万有在他里面同归于一。'},
-  'Philippians': {en:'The One who humbled himself, exalted to the highest place.', zh:'自己卑微，被升为至高的那位。'},
-  'Hebrews': {en:'The Great High Priest, mediator of a better covenant.', zh:'大祭司，更美之约的中保。'},
-  'Revelation': {en:'The Alpha and Omega, the King of Kings, the Lamb on the throne.', zh:'阿拉法和俄梅戛，万王之王，宝座上的羔羊。'},
-};
-
-/* ===== Inject additional content into panel (patch renderPanel) ===== */
-(function patchRenderPanelV3(){
-  if (typeof renderPanel !== 'function') return;
-  const _origRP = renderPanel;
-  renderPanel = function(){
-    _origRP();
-    if (_activePanelIdx < 0) return;
-    const ev = EVENTS[_activePanelIdx];
-
-    // 1. Add "View as Scripture Card" button
-    let vcBtn = document.getElementById('p-verse-btn');
-    if (!vcBtn){
-      vcBtn = document.createElement('button');
-      vcBtn.id = 'p-verse-btn';
-      vcBtn.className = 'verse-card-btn';
-      const nav = document.getElementById('p-nav');
-      if (nav) nav.parentNode.insertBefore(vcBtn, nav);
-    }
-    vcBtn.textContent = LANG === 'zh' ? '✦ 经文卡片' : '✦ Scripture Card';
-    vcBtn.onclick = () => showVerseCard(ev);
-
-    // 2. Add "Jesus in this Book" section for OT events
-    let jibDiv = document.getElementById('p-jib');
-    if (!jibDiv){
-      jibDiv = document.createElement('div');
-      jibDiv.id = 'p-jib';
-      const nav = document.getElementById('p-nav');
-      if (nav) nav.parentNode.insertBefore(jibDiv, nav);
-    }
-    if (ev.layer === 'ot'){
-      // Find which book this event belongs to
-      let bookName = null;
-      Object.values(BIBLE_BOOKS).forEach(sec => {
-        sec.forEach(b => {
-          if ((b.events || []).includes(ev.id)) bookName = b.en;
-        });
-      });
-      const jibData = bookName ? JESUS_IN_BOOK[bookName] : null;
-      if (jibData){
-        const L = LANG === 'zh' ? 'zh' : 'en';
-        jibDiv.innerHTML =
-          '<div class="jesus-in-book">' +
-          '<div class="jib-head">' + (L==='zh' ? '✝ 耶稣在这卷书中' : '✝ JESUS IN THIS BOOK') + '</div>' +
-          '<div class="jib-text">' + jibData[L] + '</div></div>';
-      } else { jibDiv.innerHTML = ''; }
-    } else { jibDiv.innerHTML = ''; }
-  };
-  window.renderPanel = renderPanel;
-})();
-
-/* ===== Keyboard shortcut for theme panel ===== */
-window.addEventListener('keydown', e => {
-  if (document.activeElement === searchInput) return;
-  if (e.key === 't' || e.key === 'T'){ toggleThemePanel(); }
-});
-
-/* ===== Auto-play: when timeline play is on and it reaches an event, briefly highlight it ===== */
-(function patchSetTimelineYearV3(){
-  if (typeof setTimelineYear !== 'function') return;
-  const _origSTY = setTimelineYear;
-  let _lastHighlightedIdx = -1;
-  setTimelineYear = function(year){
-    _origSTY(year);
-    if (year == null || !_tlPlaying) return;
-    // Find nearest event within 3 years
-    let bestIdx = -1, bestDist = Infinity;
-    EVENTS.forEach((ev, i) => {
-      if (ev.year == null) return;
-      if (!LAYER_VISIBLE[ev.layer]) return;
-      const d = Math.abs(ev.year - year);
-      if (d < bestDist && d <= 3){ bestDist = d; bestIdx = i; }
-    });
-    if (bestIdx >= 0 && bestIdx !== _lastHighlightedIdx){
-      _lastHighlightedIdx = bestIdx;
-      // Briefly pulse the label
-      const el = labelEls[bestIdx];
-      if (el){
-        el.style.transition = 'transform 0.2s, filter 0.2s';
-        el.style.transform = 'scale(1.35)';
-        el.style.filter = 'brightness(1.8)';
-        setTimeout(() => {
-          el.style.transform = '';
-          el.style.filter = '';
-        }, 600);
-      }
-    }
-  };
-  window.setTimelineYear = setTimelineYear;
-})();
-
-/* ===== Init theme panel ===== */
-(function(){ renderThemes(); })();
 
 </script>
 
