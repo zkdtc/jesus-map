@@ -387,6 +387,123 @@ body.zh #p-nav button{font-family:'Noto Serif SC',serif}
 #legend .row{display:flex;align-items:center;gap:8px;margin-top:4px}
 #legend .sw{width:14px;height:8px;border-radius:1px}
 
+/* ───── Sidebar Advertisement Boxes ───── */
+.ad-sidebar{
+  position:fixed;
+  z-index:18;
+  width:170px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  top:50%;
+  transform:translateY(-50%);
+  pointer-events:auto;
+}
+.ad-sidebar.left{left:14px}
+.ad-sidebar.right{right:14px}
+.ad-box{
+  position:relative;
+  width:100%;
+  min-height:240px;
+  background:
+    linear-gradient(180deg, rgba(36,24,12,0.78) 0%, rgba(24,16,8,0.82) 100%);
+  border:1px solid rgba(160,120,60,0.45);
+  border-radius:3px;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.35) inset,
+    0 6px 18px rgba(0,0,0,0.55),
+    0 0 18px rgba(240,200,120,0.05);
+  backdrop-filter:blur(4px);
+  font-family:'EB Garamond',serif;
+  color:#d8c098;
+  padding:14px 12px 12px;
+  overflow:hidden;
+  transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.ad-box:hover{
+  transform:translateY(-2px);
+  border-color:rgba(240,200,120,0.75);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.35) inset,
+    0 10px 24px rgba(0,0,0,0.65),
+    0 0 22px rgba(240,200,120,0.12);
+}
+.ad-box::before,
+.ad-box::after{
+  content:"";
+  position:absolute;
+  width:14px;height:14px;
+  border:1px solid rgba(216,184,120,0.6);
+  pointer-events:none;
+}
+.ad-box::before{top:4px;left:4px;border-right:none;border-bottom:none}
+.ad-box::after{bottom:4px;right:4px;border-left:none;border-top:none}
+.ad-label{
+  font-family:'Cinzel',serif;
+  font-size:9px;
+  letter-spacing:.28em;
+  color:#a89070;
+  text-align:center;
+  text-transform:uppercase;
+  border-bottom:1px solid rgba(160,120,60,0.3);
+  padding-bottom:6px;
+  margin-bottom:10px;
+}
+.ad-illum{
+  font-family:'Cinzel',serif;
+  font-size:34px;
+  color:#f0c878;
+  text-align:center;
+  line-height:1;
+  text-shadow:0 0 12px rgba(240,200,120,0.35);
+  margin:6px 0 8px;
+}
+.ad-title{
+  font-family:'Cinzel',serif;
+  font-size:13px;
+  letter-spacing:.10em;
+  color:#f0d088;
+  text-align:center;
+  margin-bottom:8px;
+  line-height:1.25;
+}
+.ad-body{
+  font-size:12.5px;
+  line-height:1.45;
+  color:#c8b088;
+  text-align:center;
+  font-style:italic;
+  margin-bottom:12px;
+}
+.ad-cta{
+  display:block;
+  text-align:center;
+  font-family:'Cinzel',serif;
+  font-size:10px;
+  letter-spacing:.20em;
+  color:#1a1208;
+  background:linear-gradient(180deg,#f0c878,#c89858);
+  border:1px solid rgba(80,50,20,0.6);
+  border-radius:2px;
+  padding:6px 8px;
+  text-decoration:none;
+  cursor:pointer;
+  transition:filter .2s ease;
+}
+.ad-cta:hover{filter:brightness(1.1)}
+.ad-foot{
+  margin-top:10px;
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:10px;
+  color:#7a6850;
+  text-align:center;
+  letter-spacing:.05em;
+}
+@media (max-width: 1280px){
+  .ad-sidebar{display:none}
+}
+
 #hint{
   position:fixed;right:20px;bottom:18px;z-index:20;
   font-family:'Cormorant Garamond',serif;font-style:italic;
@@ -1362,6 +1479,63 @@ body.zh .jesus-in-book .jib-text{font-family:'ZCOOL XiaoWei',serif;font-style:no
     <button class="vc-close" onclick="closeVerseCard()" data-en="Close" data-zh="关闭">Close</button>
   </div>
 </div>
+
+<!-- ───── Sidebar Advertisement Boxes ───── -->
+<aside class="ad-sidebar left" aria-label="Sponsored content">
+  <div class="ad-box">
+    <div class="ad-label" data-en="Sponsored" data-zh="赞助内容">Sponsored</div>
+    <div class="ad-illum">✦</div>
+    <div class="ad-title" data-en="Holy Land Tours" data-zh="圣地朝圣之旅">Holy Land Tours</div>
+    <div class="ad-body" data-en="Walk where Jesus walked. Guided pilgrimages from Galilee to Jerusalem."
+                          data-zh="跟随耶稣的足迹，从加利利到耶路撒冷的朝圣旅程。">
+      Walk where Jesus walked. Guided pilgrimages from Galilee to Jerusalem.
+    </div>
+    <a class="ad-cta" href="#" target="_blank" rel="noopener"
+       data-en="Learn More" data-zh="了解详情">Learn More</a>
+    <div class="ad-foot" data-en="— Advertisement —" data-zh="— 广告 —">— Advertisement —</div>
+  </div>
+
+  <div class="ad-box">
+    <div class="ad-label" data-en="Sponsored" data-zh="赞助内容">Sponsored</div>
+    <div class="ad-illum">✟</div>
+    <div class="ad-title" data-en="Study Bible" data-zh="研读本圣经">Study Bible</div>
+    <div class="ad-body" data-en="Premium leather-bound study Bibles with maps, notes, and commentary."
+                          data-zh="精装研读本圣经，附地图、注释与释义。">
+      Premium leather-bound study Bibles with maps, notes, and commentary.
+    </div>
+    <a class="ad-cta" href="#" target="_blank" rel="noopener"
+       data-en="Shop Now" data-zh="立即选购">Shop Now</a>
+    <div class="ad-foot" data-en="— Advertisement —" data-zh="— 广告 —">— Advertisement —</div>
+  </div>
+</aside>
+
+<aside class="ad-sidebar right" aria-label="Sponsored content">
+  <div class="ad-box">
+    <div class="ad-label" data-en="Sponsored" data-zh="赞助内容">Sponsored</div>
+    <div class="ad-illum">☧</div>
+    <div class="ad-title" data-en="Bible Atlas" data-zh="圣经地图集">Bible Atlas</div>
+    <div class="ad-body" data-en="Explore 200+ ancient maps tracing every journey of the Scriptures."
+                          data-zh="探索 200+ 古地图，追溯圣经中每一段旅程。">
+      Explore 200+ ancient maps tracing every journey of the Scriptures.
+    </div>
+    <a class="ad-cta" href="#" target="_blank" rel="noopener"
+       data-en="Discover" data-zh="开始探索">Discover</a>
+    <div class="ad-foot" data-en="— Advertisement —" data-zh="— 广告 —">— Advertisement —</div>
+  </div>
+
+  <div class="ad-box">
+    <div class="ad-label" data-en="Sponsored" data-zh="赞助内容">Sponsored</div>
+    <div class="ad-illum">♱</div>
+    <div class="ad-title" data-en="Audio Scripture" data-zh="圣经有声书">Audio Scripture</div>
+    <div class="ad-body" data-en="Listen to the entire Bible — narrated by award-winning voices."
+                          data-zh="聆听整本圣经 — 由获奖配音演员朗诵。">
+      Listen to the entire Bible — narrated by award-winning voices.
+    </div>
+    <a class="ad-cta" href="#" target="_blank" rel="noopener"
+       data-en="Try Free" data-zh="免费试听">Try Free</a>
+    <div class="ad-foot" data-en="— Advertisement —" data-zh="— 广告 —">— Advertisement —</div>
+  </div>
+</aside>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
