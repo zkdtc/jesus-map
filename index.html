@@ -5,9 +5,6 @@
 <title>The Life of Jesus Christ — A 3D Map of the Holy Land</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" />
-<!-- Google AdSense loader -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9978279523286270"
-     crossorigin="anonymous"></script>
 <style>
 /* ============== GLOBAL ============== */
 *{box-sizing:border-box;margin:0;padding:0}
@@ -390,61 +387,138 @@ body.zh #p-nav button{font-family:'Noto Serif SC',serif}
 #legend .row{display:flex;align-items:center;gap:8px;margin-top:4px}
 #legend .sw{width:14px;height:8px;border-radius:1px}
 
-/* ───── Left-down corner AdSense container ───── */
+/* ───── Donation window (bottom-left corner) ───── */
 /* Sits just above the LEGEND (which is anchored at left:20px;bottom:18px) */
-#adsense-corner{
+#donate-card{
   position:fixed;
   left:20px;
   bottom:260px;            /* leave room for the LEGEND below */
-  z-index:25;              /* above the canvas/legend so it can't be hidden */
-  width:300px;
+  z-index:25;
+  width:280px;
   max-width:38vw;
-  background:rgba(24,16,8,0.65);
-  border:1px solid rgba(160,120,60,0.45);
+  background:linear-gradient(180deg, rgba(36,24,12,0.82) 0%, rgba(20,14,8,0.88) 100%);
+  border:1px solid rgba(216,184,120,0.55);
   border-radius:3px;
-  padding:8px;
+  padding:14px 14px 12px;
   backdrop-filter:blur(4px);
-  box-shadow:0 6px 18px rgba(0,0,0,0.5);
-  /* No overflow:hidden — let the ad iframe expand if it needs to */
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.35) inset,
+    0 6px 22px rgba(0,0,0,0.6),
+    0 0 22px rgba(240,200,120,0.07);
+  font-family:'EB Garamond',serif;
+  color:#d8c098;
+  transition:transform .25s ease, box-shadow .25s ease, opacity .25s ease;
 }
-#adsense-corner .ad-tag{
+#donate-card.hidden{opacity:0;pointer-events:none;transform:translateY(8px)}
+#donate-card::before,
+#donate-card::after{
+  content:"";position:absolute;width:14px;height:14px;
+  border:1px solid rgba(216,184,120,0.7);pointer-events:none;
+}
+#donate-card::before{top:4px;left:4px;border-right:none;border-bottom:none}
+#donate-card::after{bottom:4px;right:4px;border-left:none;border-top:none}
+
+#donate-card .dc-close{
+  position:absolute;top:6px;right:8px;
+  background:none;border:none;color:#a89070;cursor:pointer;
+  font-size:16px;line-height:1;font-family:'Cinzel',serif;
+  transition:color .2s;
+}
+#donate-card .dc-close:hover{color:#f0d088}
+
+#donate-card .dc-icon{
   font-family:'Cinzel',serif;
-  font-size:9px;
-  letter-spacing:.24em;
-  color:#a89070;
+  font-size:30px;
+  color:#f0c878;
   text-align:center;
-  margin-bottom:6px;
+  line-height:1;
+  text-shadow:0 0 14px rgba(240,200,120,0.45);
+  margin:2px 0 6px;
+}
+#donate-card .dc-title{
+  font-family:'Cinzel',serif;
+  font-size:13px;
+  letter-spacing:.16em;
+  color:#f0d088;
+  text-align:center;
+  margin-bottom:8px;
   text-transform:uppercase;
 }
-/* Slot wrapper — gives the ad a guaranteed visible area */
-#adsense-corner .ad-slot{
-  position:relative;
-  width:100%;
-  min-height:120px;          /* reserves space even before AdSense loads */
-  background:rgba(0,0,0,0.25);
-  border:1px dashed rgba(160,120,60,0.35);
-  display:flex;align-items:center;justify-content:center;
+#donate-card .dc-body{
+  font-size:13px;
+  line-height:1.5;
+  color:#c8b088;
+  text-align:center;
+  font-style:italic;
+  margin-bottom:12px;
 }
-#adsense-corner .ad-slot .placeholder{
-  position:absolute;inset:0;
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Cormorant Garamond',serif;font-style:italic;
-  color:#a89070;font-size:12px;letter-spacing:.05em;text-align:center;
-  padding:6px;pointer-events:none;
+#donate-card .dc-verse{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:11px;
+  color:#7a6850;
+  text-align:center;
+  margin-bottom:10px;
+  letter-spacing:.04em;
 }
-#adsense-corner .adsbygoogle{
-  display:block;
-  width:100%;
-  min-height:120px;          /* MUST have a real height for AdSense to fill it */
+#donate-card .dc-buttons{
+  display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;
 }
+#donate-card .dc-btn{
+  display:inline-block;
+  font-family:'Cinzel',serif;
+  font-size:10.5px;
+  letter-spacing:.16em;
+  color:#1a1208;
+  background:linear-gradient(180deg,#f0c878,#c89858);
+  border:1px solid rgba(80,50,20,0.6);
+  border-radius:2px;
+  padding:6px 10px;
+  text-decoration:none;
+  cursor:pointer;
+  transition:filter .2s ease, transform .15s ease;
+}
+#donate-card .dc-btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
+#donate-card .dc-btn.alt{
+  background:transparent;
+  color:#f0d088;
+  border:1px solid rgba(216,184,120,0.5);
+}
+#donate-card .dc-btn.alt:hover{background:rgba(240,200,120,0.08)}
+#donate-card .dc-foot{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:10.5px;
+  color:#7a6850;
+  text-align:center;
+  letter-spacing:.05em;
+}
+
+/* Floating "open" button when the card is dismissed */
+#donate-reopen{
+  position:fixed;
+  left:20px;
+  bottom:260px;
+  z-index:25;
+  display:none;
+  font-family:'Cinzel',serif;
+  font-size:11px;letter-spacing:.18em;
+  color:#f0d088;
+  background:rgba(24,16,8,0.7);
+  border:1px solid rgba(216,184,120,0.5);
+  border-radius:2px;
+  padding:6px 10px;cursor:pointer;
+  backdrop-filter:blur(4px);
+  transition:background .2s, color .2s, border-color .2s;
+}
+#donate-reopen:hover{background:rgba(40,28,14,0.9);color:#fff5cc;border-color:rgba(240,200,120,0.8)}
+#donate-reopen.show{display:inline-block}
+
 @media (max-height: 720px){
-  /* on short screens, drop the ad to the very bottom-left */
-  #adsense-corner{bottom:14px;width:240px}
-  #adsense-corner .ad-slot,
-  #adsense-corner .adsbygoogle{min-height:90px}
+  #donate-card,#donate-reopen{bottom:14px;width:240px}
 }
 @media (max-width: 720px){
-  #adsense-corner{display:none}
+  #donate-card,#donate-reopen{display:none}
 }
 
 #hint{
@@ -1423,43 +1497,65 @@ body.zh .jesus-in-book .jib-text{font-family:'ZCOOL XiaoWei',serif;font-style:no
   </div>
 </div>
 
-<!-- ───── jesus-map.easylearning.ai left-down corner ads ───── -->
-<aside id="adsense-corner" aria-label="Advertisement">
-  <div class="ad-tag" data-en="Advertisement" data-zh="广告">Advertisement</div>
-  <div class="ad-slot">
-    <div class="placeholder"
-         data-en="Advertisement loading…"
-         data-zh="广告加载中…">Advertisement loading…</div>
-    <ins class="adsbygoogle"
-         style="display:block;width:100%;min-height:120px;"
-         data-ad-client="ca-pub-9978279523286270"
-         data-ad-slot="8658770557"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
+<!-- ───── Donation window (bottom-left corner) ───── -->
+<aside id="donate-card" aria-label="Support this project">
+  <button class="dc-close" type="button" aria-label="Close" title="Close"
+          onclick="closeDonateCard()">×</button>
+  <div class="dc-icon">✝</div>
+  <div class="dc-title"
+       data-en="Support This Project"
+       data-zh="支持本项目">Support This Project</div>
+  <div class="dc-body"
+       data-en="This map is a free, ad-free labor of love. If it has blessed you, consider a small gift to keep it growing."
+       data-zh="这幅地图是免费、无广告的爱心之作。若它使您得益，欢迎以小额奉献支持其持续成长。">
+    This map is a free, ad-free labor of love. If it has blessed you, consider a small gift to keep it growing.
   </div>
-  <script>
-    (function(){
-      try { (window.adsbygoogle = window.adsbygoogle || []).push({}); }
-      catch(e){ console.warn('AdSense push failed:', e); }
-      // Detect ad-blocker / failed script load and show a notice
-      setTimeout(function(){
-        var ph = document.querySelector('#adsense-corner .placeholder');
-        if (!ph) return;
-        var blocked = (typeof window.adsbygoogle === 'undefined') ||
-                      (window.adsbygoogle && window.adsbygoogle.loaded === false);
-        var ins = document.querySelector('#adsense-corner ins.adsbygoogle');
-        var filled = ins && ins.getAttribute('data-ad-status') === 'filled';
-        if (filled) { ph.style.display = 'none'; return; }
-        if (typeof window.adsbygoogle === 'undefined') {
-          ph.setAttribute('data-en', 'Ad blocker detected');
-          ph.setAttribute('data-zh', '检测到广告拦截器');
-          ph.textContent = (document.documentElement.lang === 'zh')
-            ? '检测到广告拦截器' : 'Ad blocker detected';
-        }
-      }, 2500);
-    })();
-  </script>
+  <div class="dc-verse"
+       data-en="“Freely you have received; freely give.” — Matthew 10:8"
+       data-zh="“你们白白地得来，也要白白地舍去。” — 马太福音 10:8">
+    “Freely you have received; freely give.” — Matthew 10:8
+  </div>
+  <div class="dc-buttons">
+    <a class="dc-btn" href="https://buy.stripe.com/dRm28tevQ6Ql45b72M7g400"
+       target="_blank" rel="noopener"
+       data-en="☕ Buy Me a Coffee" data-zh="☕ 请我喝杯咖啡">☕ Buy Me a Coffee</a>
+  </div>
+  <div class="dc-foot"
+       data-en="— Thank you & God bless —"
+       data-zh="— 感谢你 · 愿主祝福 —">— Thank you &amp; God bless —</div>
 </aside>
+
+<button id="donate-reopen" type="button" onclick="openDonateCard()"
+        data-en="✝ Donate" data-zh="✝ 奉献">✝ Donate</button>
+
+<script>
+  // Donation card open/close (remembers user's choice in localStorage)
+  function closeDonateCard(){
+    var c = document.getElementById('donate-card');
+    var r = document.getElementById('donate-reopen');
+    if (c) c.classList.add('hidden');
+    if (r) r.classList.add('show');
+    try { localStorage.setItem('donateClosed','1'); } catch(e){}
+  }
+  function openDonateCard(){
+    var c = document.getElementById('donate-card');
+    var r = document.getElementById('donate-reopen');
+    if (c) c.classList.remove('hidden');
+    if (r) r.classList.remove('show');
+    try { localStorage.removeItem('donateClosed'); } catch(e){}
+  }
+  // Restore previous "closed" state on load
+  (function(){
+    try {
+      if (localStorage.getItem('donateClosed') === '1') {
+        var c = document.getElementById('donate-card');
+        var r = document.getElementById('donate-reopen');
+        if (c) c.classList.add('hidden');
+        if (r) r.classList.add('show');
+      }
+    } catch(e){}
+  })();
+</script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
