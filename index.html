@@ -771,8 +771,7 @@ body.zh #loader .ls{font-family:'ZCOOL XiaoWei',serif;font-style:normal}
 
 /* ============== STORY MODE BUTTON ============== */
 #story-btn{
-  position:fixed;top:18px;left:50%;
-  transform:translateX(calc(-50% - 180px));
+  position:fixed;top:18px;right:140px;   /* clears the lang-toggle (EN | 中文) on the right */
   z-index:40;
   background:rgba(24,16,8,0.80);
   border:1px solid rgba(200,160,90,0.5);
@@ -1091,8 +1090,7 @@ body.zh .era-seg{font-family:'Noto Serif SC',serif;font-size:9px}
 
 /* ============== THEME TRACING PANEL (BibleProject-inspired) ============== */
 #theme-btn{
-  position:fixed;top:18px;left:50%;
-  transform:translateX(calc(-50% + 80px));
+  position:fixed;top:18px;right:290px;   /* same row as #story-btn, sits to its left */
   z-index:40;
   background:rgba(24,16,8,0.80);
   border:1px solid rgba(200,160,90,0.5);
